@@ -1,0 +1,35 @@
+BUEN NACER — VERSIÓN COMPLETA
+
+1. Haz una copia de tu proyecto anterior.
+2. Reemplaza index.html, styles.css y script.js por estos archivos completos.
+   No pegues nuevamente los parches ni enlaces cierre.css / cierre.js.
+3. Copia la carpeta vendor junto a los tres archivos. Contiene las bibliotecas
+   de animación necesarias; los enlaces del HTML apuntan a esta carpeta.
+4. Conserva o crea la carpeta assets e incluye tus fotografías con estos nombres:
+   - acompanamiento.webp
+   - arte.webp
+   - juego.webp
+   - familias.webp
+   Las imágenes no se incluyen: no fue posible recuperar sus originales.
+   Si tus archivos tienen otros nombres o extensiones, cambia las rutas src
+   correspondientes en index.html. Renombrar .jpg a .webp no convierte una imagen.
+5. Abre index.html o usa Live Server. Para subir a Vercel, incluye index.html,
+   styles.css, script.js, vendor y assets en la raíz del proyecto.
+
+CAMBIOS
+- Buen Nacer aparece sobre el título, con entrada de letras.
+- Se quitaron los dos botones de la portada. Conversemos queda en el menú.
+- Paleta pastel y capas de fotos con parallax sincronizado con scroll.
+- GSAP + ScrollTrigger y Lenis (solo escritorio) en una implementación.
+- Movimiento reducido y botón para desactivar animaciones.
+- Galería, menú móvil, sedes, programas y consulta por WhatsApp conservados.
+- El nombre del encabezado es tipográfico: no requiere logo.webp.
+- Los mapas muestran distritos; la dirección exacta debe confirmarse.
+
+Las fuentes de Google requieren internet y tienen fuentes de respaldo.
+WhatsApp abre la consulta preparada; no envía mensajes automáticamente.
+
+BIBLIOTECAS
+GSAP y ScrollTrigger 3.13.0: https://gsap.com/standard-license/
+Lenis 1.3.26 (MIT): https://github.com/darkroomengineering/lenis
+Los encabezados de autoría se conservan en vendor.
