@@ -2611,4 +2611,23 @@ body,
 
 #visita #contact-form .form-note {
   color: var(--muted);
+}/* ── CARRUSEL DE PORTADA: MÁS GRANDE EN PC ──────────────── */
+@media (min-width: 901px){
+
+  /* 1· Le damos más ancho a la columna del carrusel */
+  .hero-grid{
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr);
+  }
+
+  .hero .hero-visual--cover{ max-width: 780px; }
+
+  /* 2· Más alto para que quepan las tarjetas grandes */
+  .bn-cover.bn-cover-ready .bn-cover-stage{
+    height: clamp(430px, 48vw, 520px);
+  }
+
+  /* 3· ►►► EL TAMAÑO DE LA TARJETA — este es el dial ◄◄◄ */
+  .bn-cover.bn-cover-ready .bn-cover-card{
+    width: min(48%, 320px);
+  }
 }
