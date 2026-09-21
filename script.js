@@ -775,36 +775,14 @@
        Solo en escritorio con mouse fino, y solo dentro de esta sección.
        >>> AQUI SE AJUSTA <<< la velocidad del anillo y el alcance:        */
     const CURSOR_EASE = 0.12;   // 0.05 = suave, 0.3 = casi pegado
-    const PROGRAM_HOVER_DELAY = 65; // evita cambios accidentales al cruzar rápido entre tarjetas
     const programGrid = $('#programas .program-grid') || $('.program-grid');
     const programCards = programGrid ? $$('.program', programGrid) : [];
-
-    // Esta es la tarjeta a la que regresamos al sacar el mouse de todo el bloque.
-    // Si ninguna viene marcada desde el HTML, se usa la primera: Estimulación temprana.
-    const DEFAULT_PROGRAM_INDEX = Math.max(
-      0,
-      programCards.findIndex(card => card.classList.contains('is-program-active'))
-    );
-
-    let activeProgramIndex = DEFAULT_PROGRAM_INDEX;
-    let programHoverTimer = 0;
+    let activeProgramIndex = Math.max(0, programCards.findIndex(card => card.classList.contains('is-program-active')));
     let cursorRaf = 0, cursorNodes = null, cursorOff = null;
 
     function setActiveProgram(index, { focus = false } = {}) {
       if (!programCards.length) return;
-
-      const nextIndex = (index + programCards.length) % programCards.length;
-
-      // Si ya está activa, no volvemos a tocar clases ni a recalcular nada.
-      if (
-        nextIndex === activeProgramIndex &&
-        programCards[nextIndex]?.classList.contains('is-program-active')
-      ) {
-        if (focus) programCards[nextIndex].focus({ preventScroll: true });
-        return;
-      }
-
-      activeProgramIndex = nextIndex;
+      activeProgramIndex = (index + programCards.length) % programCards.length;
 
       programCards.forEach((card, cardIndex) => {
         const active = cardIndex === activeProgramIndex;
@@ -817,34 +795,13 @@
       });
 
       if (focus) programCards[activeProgramIndex].focus({ preventScroll: true });
-
-      // No hacemos ScrollTrigger.refresh() aquí.
-      // Ese refresh durante cada hover era una de las causas de la sensación de lag.
-      schedule();
-    }
-
-    function requestActiveProgram(index) {
-      clearTimeout(programHoverTimer);
-
-      if (index === activeProgramIndex) return;
-
-      programHoverTimer = setTimeout(() => {
-        setActiveProgram(index);
-      }, PROGRAM_HOVER_DELAY);
-    }
-
-    function resetActiveProgram() {
-      clearTimeout(programHoverTimer);
-      programHoverTimer = 0;
-      setActiveProgram(DEFAULT_PROGRAM_INDEX);
+      refresh();
     }
 
     // El CSS necesita una tarjeta activa para expandirla.
     if (programCards.length) setActiveProgram(activeProgramIndex);
 
     function stopWindows() {
-      clearTimeout(programHoverTimer);
-      programHoverTimer = 0;
       programGrid?.classList.remove('strip');
       root.classList.remove('bn-cursor-on');
       if (cursorRaf) cancelAnimationFrame(cursorRaf);
@@ -893,9 +850,6 @@
         if (!cursorRaf) chase();
       };
       const leave = () => {
-        // Al salir de TODO el bloque, vuelve suavemente a la tarjeta inicial.
-        resetActiveProgram();
-
         root.classList.remove('bn-cursor-on');
         if (cursorRaf) cancelAnimationFrame(cursorRaf);
         cursorRaf = 0;
@@ -913,14 +867,8 @@
           card.dataset.bnAddedTabindex = 'true';
         }
 
-        // Un pequeño hover-intent evita el efecto de rebote cuando las columnas
-        // todavía se están acomodando debajo del cursor.
-        const activate = () => requestActiveProgram(index);
-        const focusActivate = () => {
-          clearTimeout(programHoverTimer);
-          setActiveProgram(index);
-        };
-
+        const activate = () => setActiveProgram(index);
+        const focusActivate = () => setActiveProgram(index);
         card.addEventListener('pointerenter', activate);
         card.addEventListener('focusin', focusActivate);
         return { card, activate, focusActivate };
@@ -942,17 +890,10 @@
         setActiveProgram(next, { focus: true });
       };
 
-      const settlePrograms = event => {
-        if (!event.target.classList?.contains('program')) return;
-        if (event.propertyName !== 'flex-grow' && event.propertyName !== 'flex') return;
-        refresh();
-      };
-
       programGrid.addEventListener('pointerenter', enter);
       programGrid.addEventListener('pointerleave', leave);
       programGrid.addEventListener('keydown', keyboard);
-      programGrid.addEventListener('pointermove', move, { passive: true });
-      programGrid.addEventListener('transitionend', settlePrograms);
+      addEventListener('pointermove', move, { passive: true });
 
       const hotspots = $$('a, summary, button, input, select, textarea', programGrid);
       hotspots.forEach(el => {
@@ -964,8 +905,7 @@
         programGrid.removeEventListener('pointerenter', enter);
         programGrid.removeEventListener('pointerleave', leave);
         programGrid.removeEventListener('keydown', keyboard);
-        programGrid.removeEventListener('pointermove', move);
-        programGrid.removeEventListener('transitionend', settlePrograms);
+        removeEventListener('pointermove', move);
         hotspots.forEach(el => {
           el.removeEventListener('pointerenter', hotOn);
           el.removeEventListener('pointerleave', hotOff);

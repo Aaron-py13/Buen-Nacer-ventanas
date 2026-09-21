@@ -55,23 +55,13 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
   #programas .program-grid.strip .program {
     flex:1 1 0; min-width:0; position:relative; display:block;
     overflow:hidden; background:var(--green); border-radius:8px;
-    /* Solo animamos el crecimiento, no todo el shorthand flex.
-       Así evitamos recálculos visuales innecesarios y el cambio se siente más natural. */
-    transition:
-      flex-grow .56s cubic-bezier(.22,1,.36,1),
-      border-radius .32s ease;
-    contain:paint;
-    transform:translateZ(0);
+    transition:flex .7s cubic-bezier(.4,0,.2,1);
   }
   #programas .program-grid.strip .program:first-child { border-radius:28px 8px 8px 28px; }
   #programas .program-grid.strip .program:last-child { border-radius:8px 28px 28px 8px; }
-  #programas .program-grid.strip .program.is-program-active { flex-grow:2.6; }
+  #programas .program-grid.strip .program.is-program-active { flex:2.6 1 0; }
   #programas .program-grid.strip .program-photo { position:absolute; inset:0; margin:0; min-height:0; aspect-ratio:auto; }
-  #programas .program-grid.strip .program-photo img {
-    object-position:center top;
-    backface-visibility:hidden;
-    transform:translateZ(0);
-  }
+  #programas .program-grid.strip .program-photo img { object-position:center top; }
   #programas .program-grid.strip .program-photo figcaption { display:none; }
   #programas .program-grid.strip .program-photo::after {
     content:''; position:absolute; inset:0; z-index:1;
@@ -97,10 +87,10 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
   #programas .program-grid.strip .service-details ul { font-size:14px; line-height:1.65; }
   #programas .program-grid.strip .bn-card-reunion { border-color:#ffffff45; }
   #programas .program-grid.strip .program:focus-visible { outline:3px solid #e8b766; outline-offset:-4px; }
-  #programas .program-grid.strip .is-program-active .program-copy { animation:bnProgramReveal .30s cubic-bezier(.22,1,.36,1) both; }
+  #programas .program-grid.strip .is-program-active .program-copy { animation:bnProgramReveal .45s ease both; }
   .bn-cursor-on .program-grid.strip .program { cursor:none; }
 }
-@keyframes bnProgramReveal { from { opacity:.58; } to { opacity:1; } }
+@keyframes bnProgramReveal { from { opacity:.35; } to { opacity:1; } }
 @media (prefers-reduced-motion:reduce) {
   #programas .program-grid.strip .program,
   #programas .program-grid.strip .program-copy { animation:none; transition:none; }
