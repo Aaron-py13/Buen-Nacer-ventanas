@@ -2724,4 +2724,102 @@ body,
     margin: 20px 0 24px;
     line-height: 1.14;
   }
+}/* Nuevos datos e invitación dentro de cada programa */
+#programas .bn-program-datos {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+#programas .bn-card-reunion {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid currentColor;
+}
+
+#programas .bn-card-reunion-title {
+  display: block;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+#programas .bn-card-reunion p {
+  margin: 9px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#programas .bn-card-reunion small {
+  display: block;
+  margin-top: 12px;
+  max-width: 42ch;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#programas .bn-card-agenda {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-height: 46px;
+  margin-top: 8px;
+  padding: 12px 20px;
+  border: 1px solid #e5b18a;
+  border-radius: 999px;
+  background: #ffe1c8;
+  color: #713e25;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+  box-shadow: 0 4px 0 #d8aa85;
+  transition:
+    transform 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+#programas .bn-card-agenda::before,
+#programas .bn-card-agenda::after {
+  content: none;
+}
+
+#programas .bn-card-agenda > span:last-child {
+  display: inline-block;
+  font-size: 20px;
+  transition: transform 220ms ease;
+}
+
+#programas .bn-card-agenda:focus-visible {
+  outline: 3px solid #f3c56b;
+  outline-offset: 5px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #programas .bn-card-agenda:hover {
+    background: #ffd1ad;
+    transform: translateY(-3px);
+    box-shadow:
+      0 6px 0 #d8aa85,
+      0 12px 22px rgb(0 0 0 / 15%);
+  }
+
+  #programas .bn-card-agenda:hover > span:last-child {
+    transform: translate(2px, -2px);
+  }
+}
+
+#programas .bn-card-agenda:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #d8aa85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #programas .bn-card-agenda,
+  #programas .bn-card-agenda > span:last-child {
+    transition: none;
+  }
 }
