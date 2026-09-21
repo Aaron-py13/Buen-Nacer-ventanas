@@ -41,30 +41,59 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
    cursor de dos capas). Los colores son los de Buen Nacer.
    La clase .strip la pone script.js: sin JS o con animaciones pausadas
    las tarjetas vuelven a su diseño apilado de siempre. ─────────────── */
-@media (min-width:901px) and (hover:hover) and (pointer:fine){
-  .program-grid.strip{display:flex;gap:5px;height:min(72vh,600px);min-height:430px}
-  .program-grid.strip .program{flex:1 1 0;min-width:0;position:relative;display:block;overflow:hidden;background:var(--green);border-radius:8px;transition:flex .7s cubic-bezier(.4,0,.2,1)}
-  .program-grid.strip .program:first-child{border-radius:28px 8px 8px 28px}
-  .program-grid.strip .program:last-child{border-radius:8px 28px 28px 8px}
-  .program-grid.strip .program:hover,.program-grid.strip .program:focus-within{flex:2.6 1 0}
-  /* Foto al fondo, con velo verde para que el texto se lea */
-  .program-grid.strip .program-photo{position:absolute;inset:0;min-height:0;aspect-ratio:auto;transition:transform .8s ease}
-  .program-grid.strip .program:hover .program-photo{transform:scale(1.04)}
-  .program-grid.strip .program-photo figcaption{display:none}
-  .program-grid.strip .program-photo::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#254d3c1a 0%,#254d3c00 26%,#254d3cc4 68%,#254d3cf5 100%)}
-  /* Texto encima. El título se ve siempre, el resto aparece al acercarse */
-  .program-grid.strip .program-copy{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;align-self:stretch;padding:34px 30px;color:#fff}
-  .program-grid.strip .program-copy h3{color:#fff;font-size:clamp(1.55rem,1.9vw,2.3rem)}
-  .program-grid.strip .program-number{color:var(--yellow);margin-bottom:14px}
-  .program-grid.strip .age{border-color:#ffffff59;color:#fff}
-  .program-grid.strip .program-copy>p{color:#ffffffd9;max-width:38ch}
-  .program-grid.strip .service-details{display:none}
-  .program-grid.strip .program-copy .text-link{color:#fff;border-bottom-color:#ffffff8c}
-  .program-grid.strip .program-copy .text-link:hover{color:var(--yellow)}
-  .program-grid.strip .program-number,.program-grid.strip .age,.program-grid.strip .program-copy>p,.program-grid.strip .program-copy .text-link{opacity:0;transform:translateY(16px);transition:opacity .5s .1s var(--ease),transform .5s .1s var(--ease)}
-  .program-grid.strip .program:hover .program-number,.program-grid.strip .program:hover .age,.program-grid.strip .program:hover .program-copy>p,.program-grid.strip .program:hover .program-copy .text-link,.program-grid.strip .program:focus-within .program-number,.program-grid.strip .program:focus-within .age,.program-grid.strip .program:focus-within .program-copy>p,.program-grid.strip .program:focus-within .program-copy .text-link{opacity:1;transform:none}
-  /* El cursor del sistema solo se oculta si el personalizado llegó a montarse */
-  .bn-cursor-on .program-grid.strip .program{cursor:none}
+/* Programas: la altura la determina el contenido de la tarjeta activa. */
+#programas .bn-card-agenda,
+#programas .program-copy > .text-link { display:none !important; }
+#programas .bn-program-datos { font-size:14px; line-height:1.65; }
+#programas .bn-card-reunion { margin-top:20px; padding-top:18px; border-top:1px solid currentColor; }
+#programas .bn-card-reunion-title { display:block; font-size:17px; line-height:1.4; }
+#programas .bn-card-reunion p { margin:10px 0; font-size:14px; line-height:1.65; }
+#programas .bn-card-reunion small { display:block; margin-top:12px; font-size:12px; line-height:1.6; }
+
+@media (min-width:901px) and (hover:hover) and (pointer:fine) {
+  #programas .program-grid.strip { display:flex; gap:6px; height:auto; min-height:0; align-items:stretch; }
+  #programas .program-grid.strip .program {
+    flex:1 1 0; min-width:0; position:relative; display:block;
+    overflow:hidden; background:var(--green); border-radius:8px;
+    transition:flex .7s cubic-bezier(.4,0,.2,1);
+  }
+  #programas .program-grid.strip .program:first-child { border-radius:28px 8px 8px 28px; }
+  #programas .program-grid.strip .program:last-child { border-radius:8px 28px 28px 8px; }
+  #programas .program-grid.strip .program.is-program-active { flex:2.6 1 0; }
+  #programas .program-grid.strip .program-photo { position:absolute; inset:0; margin:0; min-height:0; aspect-ratio:auto; }
+  #programas .program-grid.strip .program-photo img { object-position:center top; }
+  #programas .program-grid.strip .program-photo figcaption { display:none; }
+  #programas .program-grid.strip .program-photo::after {
+    content:''; position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg,rgba(15,35,30,.03),rgba(15,35,30,.12) 40%,rgba(15,35,30,.82));
+  }
+  #programas .program-grid.strip .is-program-active .program-photo::after {
+    background:linear-gradient(180deg,rgba(15,35,30,.03),rgba(15,35,30,.2) 12%,rgba(15,35,30,.8) 30%,rgba(15,35,30,.94) 100%);
+  }
+  #programas .program-grid.strip .program-copy {
+    position:relative; z-index:2; height:auto; padding:clamp(150px,15vw,210px) clamp(22px,2.3vw,36px) 30px;
+    color:white; background:none; min-width:0;
+  }
+  #programas .program-grid.strip .program:not(.is-program-active) .program-copy {
+    position:absolute; inset:auto 0 0; padding:30px 22px;
+  }
+  #programas .program-grid.strip .program:not(.is-program-active) .program-copy > :not(h3) { display:none; }
+  #programas .program-grid.strip h3 { margin:8px 0 12px; color:white; font-size:clamp(1.5rem,2.1vw,2.2rem); line-height:1.15; overflow-wrap:break-word; }
+  #programas .program-grid.strip .program-number { display:block; color:#ffe3a8; font-size:11px; line-height:1.5; }
+  #programas .program-grid.strip .age { color:white; border-color:#ffffff55; margin-top:0; }
+  #programas .program-grid.strip .program-copy > p { color:white; font-size:15px; line-height:1.65; margin:14px 0; }
+  #programas .program-grid.strip .service-details { display:block; border-color:#ffffff45; margin-top:14px; }
+  #programas .program-grid.strip summary { min-height:44px; padding:10px 0; }
+  #programas .program-grid.strip .service-details ul { font-size:14px; line-height:1.65; }
+  #programas .program-grid.strip .bn-card-reunion { border-color:#ffffff45; }
+  #programas .program-grid.strip .program:focus-visible { outline:3px solid #e8b766; outline-offset:-4px; }
+  #programas .program-grid.strip .is-program-active .program-copy { animation:bnProgramReveal .45s ease both; }
+  .bn-cursor-on .program-grid.strip .program { cursor:none; }
+}
+@keyframes bnProgramReveal { from { opacity:.35; } to { opacity:1; } }
+@media (prefers-reduced-motion:reduce) {
+  #programas .program-grid.strip .program,
+  #programas .program-grid.strip .program-copy { animation:none; transition:none; }
 }
 /* Cursor de dos capas: punto inmediato + anillo que persigue con retardo */
 #bn-cursor,#bn-cursor-ring{position:fixed;left:0;top:0;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .3s,width .25s,height .25s,margin .25s,border-color .25s}
@@ -2723,221 +2752,5 @@ body,
     font-size: clamp(2rem, 8.6vw, 3rem);
     margin: 20px 0 24px;
     line-height: 1.14;
-  }
-}/* Nuevos datos e invitación dentro de cada programa */
-#programas .bn-program-datos {
-  font-size: 13px;
-  line-height: 1.65;
-}
-
-#programas .bn-card-reunion {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid currentColor;
-}
-
-#programas .bn-card-reunion-title {
-  display: block;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-#programas .bn-card-reunion p {
-  margin: 9px 0;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-#programas .bn-card-reunion small {
-  display: block;
-  margin-top: 12px;
-  max-width: 42ch;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-#programas .bn-card-agenda {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  box-sizing: border-box;
-  max-width: 100%;
-  min-height: 46px;
-  margin-top: 8px;
-  padding: 12px 20px;
-  border: 1px solid #e5b18a;
-  border-radius: 999px;
-  background: #ffe1c8;
-  color: #713e25;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-decoration: none;
-  box-shadow: 0 4px 0 #d8aa85;
-  transition:
-    transform 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease;
-}
-
-#programas .bn-card-agenda::before,
-#programas .bn-card-agenda::after {
-  content: none;
-}
-
-#programas .bn-card-agenda > span:last-child {
-  display: inline-block;
-  font-size: 20px;
-  transition: transform 220ms ease;
-}
-
-#programas .bn-card-agenda:focus-visible {
-  outline: 3px solid #f3c56b;
-  outline-offset: 5px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #programas .bn-card-agenda:hover {
-    background: #ffd1ad;
-    transform: translateY(-3px);
-    box-shadow:
-      0 6px 0 #d8aa85,
-      0 12px 22px rgb(0 0 0 / 15%);
-  }
-
-  #programas .bn-card-agenda:hover > span:last-child {
-    transform: translate(2px, -2px);
-  }
-}
-
-#programas .bn-card-agenda:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #d8aa85;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #programas .bn-card-agenda,
-  #programas .bn-card-agenda > span:last-child {
-    transition: none;
-  }
-}/* PROGRAMAS: contenido completo y legible */
-#programas .program-grid {
-  height: auto !important;
-  max-height: none !important;
-  align-items: stretch;
-}
-
-#programas .program {
-  height: auto !important;
-  max-height: none !important;
-  min-height: 680px;
-  box-sizing: border-box;
-}
-
-/* El texto ocupa espacio real y determina la altura */
-#programas .program .program-copy {
-  position: relative !important;
-  inset: auto !important;
-  height: auto !important;
-  max-height: none !important;
-  box-sizing: border-box;
-  padding: clamp(26px, 3vw, 44px);
-  overflow: visible !important;
-  color: #fff;
-  z-index: 2;
-
-  /* Contraste para leer sobre la fotografía */
-  background: linear-gradient(
-    180deg,
-    rgba(18, 49, 42, 0.76),
-    rgba(18, 49, 42, 0.94)
-  );
-}
-
-#programas .program-copy h3 {
-  margin: 12px 0 18px;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  line-height: 1.16;
-  color: #fff;
-}
-
-#programas .program-copy p {
-  margin: 16px 0;
-  font-size: 16px;
-  line-height: 1.75;
-  color: #fff;
-}
-
-#programas .program-copy .age {
-  display: inline-block;
-  max-width: 100%;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: normal;
-  color: #fff;
-}
-
-#programas .program-copy .program-number {
-  color: #ffe3a8;
-}
-
-#programas .program-copy .bn-program-datos {
-  font-size: 15px;
-  line-height: 1.8;
-}
-
-#programas .bn-card-reunion {
-  margin-top: 24px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-#programas .bn-card-reunion-title {
-  font-size: 18px;
-  line-height: 1.5;
-  color: #fff;
-}
-
-#programas .bn-card-reunion p {
-  font-size: 15px;
-  line-height: 1.75;
-}
-
-#programas .bn-card-reunion small {
-  display: block;
-  margin-top: 16px;
-  font-size: 13px;
-  line-height: 1.65;
-  color: #fff;
-}
-
-/* Ocultar temporalmente los enlaces y botones de consulta */
-#programas .program-copy a {
-  display: none !important;
-}
-
-/* Actividades legibles al desplegarlas */
-#programas .service-details,
-#programas .service-details summary,
-#programas .service-details li {
-  color: #fff;
-}
-
-#programas .service-details li {
-  margin-bottom: 8px;
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-@media (max-width: 760px) {
-  #programas .program {
-    min-height: 0;
-  }
-
-  #programas .program .program-copy {
-    padding: 28px 22px;
   }
 }

@@ -1,4 +1,4 @@
-/* Buen Nacer · JavaScript completo. No agregar los parches anteriores. */
+/* Buen Nacer · JavaScript MEJORADO y sincronizado con el CSS actual. Reemplaza el script anterior completo. */
 (() => {
   'use strict';
 
@@ -281,6 +281,7 @@
     const fine = matchMedia('(hover: hover) and (pointer: fine)');
 
     let paused = false, mediaContext = null, lenis = null, ticker = null;
+    let refreshTimer;
     let pointerHandler = null, pointerLeave = null;
 
     const hero = $('.hero');
@@ -323,16 +324,26 @@
     }
     (document.fonts?.ready || Promise.resolve()).then(() => { fontsReady = true; startFly(); });
 
-    // Programas: conservar el selector del formulario.
+    // Programas: conservar el selector del formulario sin duplicar enlaces.
     $$('.program').forEach((card, index) => {
-      const a = document.createElement('a');
-      a.className = 'text-link'; a.href = '#visita';
-      a.textContent = 'Consultar por este programa ↗';
+      const copy = $('.program-copy', card);
+      if (!copy) return;
+
+      let a = $('.text-link[href="#visita"]', copy);
+      if (!a) {
+        a = document.createElement('a');
+        a.className = 'text-link';
+        a.href = '#visita';
+        a.textContent = 'Consultar por este programa ↗';
+        copy.appendChild(a);
+      }
+
       a.addEventListener('click', () => {
         const select = $('#program');
-        if (select) select.selectedIndex = index;
+        if (!select) return;
+        select.selectedIndex = Math.min(index, Math.max(0, select.options.length - 1));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
       });
-      $('.program-copy', card)?.appendChild(a);
     });
 
     // Pestañas accesibles de sedes.
@@ -364,6 +375,97 @@
         if (next === undefined) return;
         e.preventDefault(); tabs[next].focus(); selectTab(tabs[next]);
       });
+    });
+
+    // Asegura un estado inicial coherente para las sedes y carga solo el mapa activo.
+    const initialTab = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
+    if (initialTab) selectTab(initialTab);
+
+    /* ==========================================================
+       GALERÍA / IMAGEN AMPLIADA
+       El CSS ya define #gallery-dialog, #gallery-image y controles.
+       ========================================================== */
+    const moments = $$('.moment');
+    const galleryImage = dialog ? $('#gallery-image', dialog) : null;
+    const galleryTitle = dialog ? $('#gallery-title', dialog) : null;
+    const galleryPrev = dialog ? $('#gallery-prev', dialog) : null;
+    const galleryNext = dialog ? $('#gallery-next', dialog) : null;
+    const galleryClose = dialog ? $('.dialog-close', dialog) : null;
+    let galleryIndex = 0;
+    let galleryReturnFocus = null;
+
+    function galleryData(index) {
+      if (!moments.length) return null;
+      galleryIndex = (index + moments.length) % moments.length;
+      const item = moments[galleryIndex];
+      const img = $('img', item);
+      if (!img) return null;
+      const title = item.dataset.title || $('big', item)?.textContent?.trim() || img.alt || `Imagen ${galleryIndex + 1}`;
+      const src = item.dataset.full || img.dataset.full || img.currentSrc || img.src;
+      return { item, img, title, src };
+    }
+
+    function renderGallery(index) {
+      const data = galleryData(index);
+      if (!data || !galleryImage) return;
+      galleryImage.src = data.src;
+      galleryImage.alt = data.img.alt || data.title;
+      if (galleryTitle) galleryTitle.textContent = data.title;
+    }
+
+    function openGallery(index, opener) {
+      if (!dialog || !galleryImage || !moments.length) return;
+      galleryReturnFocus = opener || document.activeElement;
+      renderGallery(index);
+      document.body.classList.add('modal-open');
+      if (!dialog.open) {
+        if (typeof dialog.showModal === 'function') dialog.showModal();
+        else dialog.setAttribute('open', '');
+      }
+      lenis?.stop();
+      galleryClose?.focus({ preventScroll: true });
+    }
+
+    function closeGallery() {
+      if (!dialog) return;
+      if (typeof dialog.close === 'function' && dialog.open) dialog.close();
+      else dialog.removeAttribute('open');
+    }
+
+    moments.forEach((moment, index) => {
+      moment.addEventListener('click', () => openGallery(index, moment));
+
+      // Si .moment no es botón/enlace, le damos navegación por teclado.
+      const nativeInteractive = moment.matches('button, a[href], input, select, textarea, summary');
+      if (!nativeInteractive) {
+        if (!moment.hasAttribute('tabindex')) moment.tabIndex = 0;
+        if (!moment.hasAttribute('role')) moment.setAttribute('role', 'button');
+        moment.addEventListener('keydown', event => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          openGallery(index, moment);
+        });
+      }
+    });
+
+    galleryPrev?.addEventListener('click', () => renderGallery(galleryIndex - 1));
+    galleryNext?.addEventListener('click', () => renderGallery(galleryIndex + 1));
+    galleryClose?.addEventListener('click', closeGallery);
+
+    dialog?.addEventListener('click', event => {
+      if (event.target === dialog) closeGallery();
+    });
+
+    dialog?.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); renderGallery(galleryIndex - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); renderGallery(galleryIndex + 1); }
+    });
+
+    dialog?.addEventListener('close', () => {
+      document.body.classList.remove('modal-open');
+      lenis?.start();
+      galleryReturnFocus?.focus?.({ preventScroll: true });
+      galleryReturnFocus = null;
     });
 
     /* ==========================================================
@@ -610,7 +712,30 @@
     // WhatsApp prepara el texto; el usuario confirma el envío allí.
     const form = $('#contact-form');
     const parent = $('#parent');
+    const programSelect = $('#program');
+    const sedeSelect = $('#sede');
+    const liveSummary = form ? $('.contact-live-summary', form) : null;
+
+    function updateContactSummary() {
+      if (!liveSummary) return;
+      const parts = [];
+      const name = parent?.value.trim();
+      if (name) parts.push(`Familia: ${name}`);
+      if (programSelect?.value) parts.push(`Programa: ${programSelect.value}`);
+      if (sedeSelect?.value) parts.push(`Sede: ${sedeSelect.value}`);
+      liveSummary.textContent = parts.join(' · ');
+    }
+
+    form?.querySelectorAll('input, select, textarea').forEach(field => {
+      const label = field.id ? form.querySelector(`label[for="${CSS.escape(field.id)}"]`) : null;
+      field.addEventListener('focus', () => label?.classList.add('is-focused'));
+      field.addEventListener('blur', () => label?.classList.remove('is-focused'));
+      field.addEventListener('input', updateContactSummary);
+      field.addEventListener('change', updateContactSummary);
+    });
+
     parent?.addEventListener('input', () => parent.setCustomValidity(''));
+    updateContactSummary();
     form?.addEventListener('submit', e => {
       e.preventDefault();
       if (!parent || !$('#program') || !$('#sede')) return;
@@ -649,9 +774,32 @@
          anillo que lo persigue con retardo (rx += (mx-rx) * EASE).
        Solo en escritorio con mouse fino, y solo dentro de esta sección.
        >>> AQUI SE AJUSTA <<< la velocidad del anillo y el alcance:        */
-    const CURSOR_EASE = 0.12;   // 0.05 = muy perezoso, 0.3 = casi pegado
-    const programGrid = $('.program-grid');
+    const CURSOR_EASE = 0.12;   // 0.05 = suave, 0.3 = casi pegado
+    const programGrid = $('#programas .program-grid') || $('.program-grid');
+    const programCards = programGrid ? $$('.program', programGrid) : [];
+    let activeProgramIndex = Math.max(0, programCards.findIndex(card => card.classList.contains('is-program-active')));
     let cursorRaf = 0, cursorNodes = null, cursorOff = null;
+
+    function setActiveProgram(index, { focus = false } = {}) {
+      if (!programCards.length) return;
+      activeProgramIndex = (index + programCards.length) % programCards.length;
+
+      programCards.forEach((card, cardIndex) => {
+        const active = cardIndex === activeProgramIndex;
+        card.classList.toggle('is-program-active', active);
+
+        // Al cambiar de ventana, los details de las otras tarjetas se cierran.
+        if (!active) {
+          $$('details[open]', card).forEach(detail => { detail.open = false; });
+        }
+      });
+
+      if (focus) programCards[activeProgramIndex].focus({ preventScroll: true });
+      refresh();
+    }
+
+    // El CSS necesita una tarjeta activa para expandirla.
+    if (programCards.length) setActiveProgram(activeProgramIndex);
 
     function stopWindows() {
       programGrid?.classList.remove('strip');
@@ -661,11 +809,21 @@
       cursorOff?.(); cursorOff = null;
       cursorNodes?.forEach(node => node.remove());
       cursorNodes = null;
+
+      programCards.forEach(card => {
+        if (card.dataset.bnAddedTabindex === 'true') {
+          card.removeAttribute('tabindex');
+          delete card.dataset.bnAddedTabindex;
+        }
+      });
     }
 
     function startWindows(large) {
-      if (!programGrid || !large || !fine.matches || disabled()) return;
+      if (!programGrid || !programCards.length || !large || !fine.matches || disabled()) return;
+      if (programGrid.classList.contains('strip') && cursorNodes) return;
+
       programGrid.classList.add('strip');
+      setActiveProgram(activeProgramIndex);
 
       const dot = document.createElement('div');
       const ring = document.createElement('div');
@@ -685,7 +843,6 @@
         ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
         cursorRaf = requestAnimationFrame(chase);
       };
-      // Al entrar se coloca de golpe para que no cruce la pantalla volando.
       const enter = e => {
         mx = rx = e.clientX; my = ry = e.clientY;
         dot.style.transform = ring.style.transform = `translate3d(${mx}px,${my}px,0)`;
@@ -694,15 +851,51 @@
       };
       const leave = () => {
         root.classList.remove('bn-cursor-on');
-        cancelAnimationFrame(cursorRaf); cursorRaf = 0;
+        if (cursorRaf) cancelAnimationFrame(cursorRaf);
+        cursorRaf = 0;
       };
-      const heat = on => { dot.classList.toggle('is-hot', on); ring.classList.toggle('is-hot', on); };
+      const heat = on => {
+        dot.classList.toggle('is-hot', on);
+        ring.classList.toggle('is-hot', on);
+      };
       const hotOn = () => heat(true), hotOff = () => heat(false);
+
+      // La parte que faltaba: cambiar .is-program-active al pasar a otra tarjeta.
+      const cardHandlers = programCards.map((card, index) => {
+        if (!card.hasAttribute('tabindex')) {
+          card.tabIndex = 0;
+          card.dataset.bnAddedTabindex = 'true';
+        }
+
+        const activate = () => setActiveProgram(index);
+        const focusActivate = () => setActiveProgram(index);
+        card.addEventListener('pointerenter', activate);
+        card.addEventListener('focusin', focusActivate);
+        return { card, activate, focusActivate };
+      });
+
+      const keyboard = event => {
+        const card = event.target.closest('.program');
+        if (!card || !programGrid.contains(card)) return;
+        const index = programCards.indexOf(card);
+        if (index < 0 || event.target !== card) return;
+
+        let next = null;
+        if (event.key === 'ArrowRight') next = index + 1;
+        if (event.key === 'ArrowLeft') next = index - 1;
+        if (event.key === 'Home') next = 0;
+        if (event.key === 'End') next = programCards.length - 1;
+        if (next === null) return;
+        event.preventDefault();
+        setActiveProgram(next, { focus: true });
+      };
 
       programGrid.addEventListener('pointerenter', enter);
       programGrid.addEventListener('pointerleave', leave);
+      programGrid.addEventListener('keydown', keyboard);
       addEventListener('pointermove', move, { passive: true });
-      const hotspots = $$('a, summary, button', programGrid);
+
+      const hotspots = $$('a, summary, button, input, select, textarea', programGrid);
       hotspots.forEach(el => {
         el.addEventListener('pointerenter', hotOn);
         el.addEventListener('pointerleave', hotOff);
@@ -711,12 +904,22 @@
       cursorOff = () => {
         programGrid.removeEventListener('pointerenter', enter);
         programGrid.removeEventListener('pointerleave', leave);
+        programGrid.removeEventListener('keydown', keyboard);
         removeEventListener('pointermove', move);
         hotspots.forEach(el => {
           el.removeEventListener('pointerenter', hotOn);
           el.removeEventListener('pointerleave', hotOff);
         });
+        cardHandlers.forEach(({ card, activate, focusActivate }) => {
+          card.removeEventListener('pointerenter', activate);
+          card.removeEventListener('focusin', focusActivate);
+        });
       };
+    }
+
+    function syncWindows() {
+      stopWindows();
+      if (!disabled() && desktop.matches && fine.matches) startWindows(true);
     }
 
     function stopMotion() {
@@ -749,6 +952,9 @@
           ? 'Movimiento reducido del dispositivo'
           : paused ? 'Activar animaciones' : 'Pausar animaciones';
       }
+      // Las ventanas de Programas son CSS puro: deben funcionar aunque GSAP no cargue.
+      syncWindows();
+
       if (disabled() || !canGSAP) {
         updateStories(storyIndex, false);
         startStoryAutoplay();
@@ -759,7 +965,6 @@
       mediaContext = gsap.matchMedia();
       mediaContext.add({ desktop: '(min-width: 901px)', mobile: '(max-width: 900px)' }, context => {
         const large = context.conditions.desktop;
-        startWindows(large);
 
         // La entrada del wordmark la gobierna ahora el efecto de letras voladoras.
         const entrance = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -1002,7 +1207,6 @@
         }
 
         return () => {
-          stopWindows();
           hero?.removeEventListener('pointermove', pointerHandler);
           hero?.removeEventListener('pointerleave', pointerLeave);
           if (ticker) gsap.ticker.remove(ticker);
@@ -1018,6 +1222,8 @@
 
     motionButton?.addEventListener('click', () => { paused = !paused; setupMotion(); });
     reduce.addEventListener('change', setupMotion);
+    desktop.addEventListener('change', syncWindows);
+    fine.addEventListener('change', syncWindows);
 
     // Scroll nativo como respaldo si no se cargan las bibliotecas.
     let raf = 0;
@@ -1042,7 +1248,6 @@
       });
     }
 
-    let refreshTimer;
     function refresh() {
       clearTimeout(refreshTimer);
       refreshTimer = setTimeout(() => { if (canGSAP) ScrollTrigger.refresh(); lenis?.resize(); schedule(); }, 80);
@@ -1086,6 +1291,7 @@
   let paused = [];
 
   function icon() {
+    if (!btnS) return;
     btnS.textContent = video.muted ? '🔇' : '🔊';
     btnS.setAttribute('aria-label', video.muted ? 'Activar sonido' : 'Silenciar');
   }
@@ -1117,7 +1323,10 @@
     video.removeAttribute('src');
     video.load();
     document.body.classList.remove('modal-open');
-    paused.forEach(v => { if (v.closest('.story-card.is-active')) v.play().catch(() => {}); });
+    const motionOff = document.documentElement.classList.contains('motion-off');
+    paused.forEach(v => {
+      if (!motionOff && !document.hidden && v.closest('.story-card.is-active')) v.play().catch(() => {});
+    });
   }
 
   // abrir: clic en la tarjeta activa o en su botón de sonido
@@ -1130,8 +1339,8 @@
     open(card);
   }, true);
 
-  btnS.addEventListener('click', () => { video.muted = !video.muted; icon(); });
-  btnX.addEventListener('click', () => dlg.close());
+  btnS?.addEventListener('click', () => { video.muted = !video.muted; icon(); });
+  btnX?.addEventListener('click', () => dlg.close());
   dlg.addEventListener('close', close);
 
   // clic fuera del video cierra
