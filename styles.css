@@ -45,17 +45,13 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
 #programas .bn-card-agenda,
 #programas .program-copy > .text-link { display:none !important; }
 #programas .bn-program-datos { font-size:14px; line-height:1.65; }
-#programas .bn-card-reunion { margin-top:20px; padding-top:18px; border-top:1px solid currentColor; }
-#programas .bn-card-reunion-title { display:block; font-size:17px; line-height:1.4; }
-#programas .bn-card-reunion p { margin:10px 0; font-size:14px; line-height:1.65; }
-#programas .bn-card-reunion small { display:block; margin-top:12px; font-size:12px; line-height:1.6; }
 
 @media (min-width:901px) and (hover:hover) and (pointer:fine) {
   #programas .program-grid.strip { display:flex; gap:6px; height:auto; min-height:0; align-items:stretch; }
   #programas .program-grid.strip .program {
     flex:1 1 0; min-width:0; position:relative; display:block;
     overflow:hidden; background:var(--green); border-radius:8px;
-    transition:flex .7s cubic-bezier(.4,0,.2,1);
+    transition:flex .75s cubic-bezier(.22,.61,.36,1);
   }
   #programas .program-grid.strip .program:first-child { border-radius:28px 8px 8px 28px; }
   #programas .program-grid.strip .program:last-child { border-radius:8px 28px 28px 8px; }
@@ -73,7 +69,9 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
   #programas .program-grid.strip .program-copy {
     position:relative; z-index:2; height:auto; padding:clamp(150px,15vw,210px) clamp(22px,2.3vw,36px) 30px;
     color:white; background:none; min-width:0;
+    opacity:1; transition:opacity .3s ease;
   }
+  #programas .program-grid.strip .is-program-active .program-copy { width:var(--bn-expanded-copy-width, 100%); box-sizing:border-box; }
   #programas .program-grid.strip .program:not(.is-program-active) .program-copy {
     position:absolute; inset:auto 0 0; padding:30px 22px;
   }
@@ -85,9 +83,8 @@ dialog{width:min(900px,calc(100% - 28px));max-height:92dvh;overflow:auto;padding
   #programas .program-grid.strip .service-details { display:block; border-color:#ffffff45; margin-top:14px; }
   #programas .program-grid.strip summary { min-height:44px; padding:10px 0; }
   #programas .program-grid.strip .service-details ul { font-size:14px; line-height:1.65; }
-  #programas .program-grid.strip .bn-card-reunion { border-color:#ffffff45; }
   #programas .program-grid.strip .program:focus-visible { outline:3px solid #e8b766; outline-offset:-4px; }
-  #programas .program-grid.strip .is-program-active .program-copy { animation:bnProgramReveal .45s ease both; }
+  #programas .program-grid.strip .bn-copy-switching .program-copy { opacity:0; transition-duration:.16s; }
   .bn-cursor-on .program-grid.strip .program { cursor:none; }
 }
 @keyframes bnProgramReveal { from { opacity:.35; } to { opacity:1; } }

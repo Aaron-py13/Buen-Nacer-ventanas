@@ -780,28 +780,64 @@
     let activeProgramIndex = Math.max(0, programCards.findIndex(card => card.classList.contains('is-program-active')));
     let cursorRaf = 0, cursorNodes = null, cursorOff = null;
 
+    let programSwapTimer = null;
+    let programRevealTimer = null;
+    let requestedProgramIndex = activeProgramIndex;
+
+    function clearProgramTransition() {
+      clearTimeout(programSwapTimer);
+      clearTimeout(programRevealTimer);
+      programCards.forEach(card => card.classList.remove('bn-copy-switching'));
+    }
+
     function setActiveProgram(index, { focus = false } = {}) {
       if (!programCards.length) return;
-      activeProgramIndex = (index + programCards.length) % programCards.length;
+      const next = (index + programCards.length) % programCards.length;
+      const initialized = programCards.some(card => card.classList.contains('is-program-active'));
+      if (initialized && next === requestedProgramIndex && !focus) return;
+      requestedProgramIndex = next;
+      clearProgramTransition();
 
-      programCards.forEach((card, cardIndex) => {
-        const active = cardIndex === activeProgramIndex;
-        card.classList.toggle('is-program-active', active);
+      const apply = () => {
+        activeProgramIndex = next;
+        programCards.forEach((card, cardIndex) => {
+          const active = cardIndex === next;
+          card.classList.toggle('is-program-active', active);
+          if (!active) {
+            $$('details[open]', card).forEach(detail => { detail.open = false; });
+          }
+        });
+        if (focus) programCards[next].focus({ preventScroll: true });
+        refresh();
+      };
 
-        // Al cambiar de ventana, los details de las otras tarjetas se cierran.
-        if (!active) {
-          $$('details[open]', card).forEach(detail => { detail.open = false; });
-        }
-      });
+      if (!initialized || !programGrid.classList.contains('strip') || disabled() || focus) {
+        apply();
+        return;
+      }
+      if (next === activeProgramIndex) return;
 
-      if (focus) programCards[activeProgramIndex].focus({ preventScroll: true });
-      refresh();
+      // Conserva el espacio de lectura mientras las columnas cambian de ancho.
+      programGrid.style.minHeight = `${programGrid.getBoundingClientRect().height}px`;
+      programCards[activeProgramIndex].classList.add('bn-copy-switching');
+      programCards[next].classList.add('bn-copy-switching');
+      programSwapTimer = setTimeout(() => {
+        apply();
+        programRevealTimer = setTimeout(() => {
+          programCards.forEach(card => card.classList.remove('bn-copy-switching'));
+          refresh();
+        }, 550);
+      }, 160);
     }
 
     // El CSS necesita una tarjeta activa para expandirla.
     if (programCards.length) setActiveProgram(activeProgramIndex);
 
     function stopWindows() {
+      clearProgramTransition();
+      requestedProgramIndex = activeProgramIndex;
+      programGrid?.style.removeProperty('min-height');
+      programGrid?.style.removeProperty('--bn-expanded-copy-width');
       programGrid?.classList.remove('strip');
       root.classList.remove('bn-cursor-on');
       if (cursorRaf) cancelAnimationFrame(cursorRaf);
@@ -823,6 +859,9 @@
       if (programGrid.classList.contains('strip') && cursorNodes) return;
 
       programGrid.classList.add('strip');
+      const stripGap = parseFloat(getComputedStyle(programGrid).columnGap) || 0;
+      const expandedWidth = (programGrid.clientWidth - stripGap * (programCards.length - 1)) * 2.6 / (programCards.length + 1.6);
+      programGrid.style.setProperty('--bn-expanded-copy-width', `${expandedWidth}px`);
       setActiveProgram(activeProgramIndex);
 
       const dot = document.createElement('div');
