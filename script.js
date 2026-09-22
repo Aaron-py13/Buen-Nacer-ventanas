@@ -743,7 +743,7 @@
       parent.setCustomValidity(name ? '' : 'Escribe tu nombre.');
       if (!form.reportValidity()) return;
       const message = `Hola, Buen Nacer. Mi nombre es ${name}.\n\nMe interesa: ${$('#program').value}.\nSede: ${$('#sede').value}.\n\nQuisiera conocer los horarios, la disponibilidad y cómo coordinar una visita. ¡Gracias!`;
-      const url = `https://wa.me/51966321996?text=${encodeURIComponent(message)}`;
+      const url = `https://wa.me/51918257114?text=${encodeURIComponent(message)}`;
       if ($('#message')) $('#message').value = message;
       if ($('#whatsapp-message')) $('#whatsapp-message').href = url;
       if ($('#message-result')) $('#message-result').hidden = false;
