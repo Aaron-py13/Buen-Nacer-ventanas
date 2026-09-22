@@ -217,6 +217,9 @@
         </div>
       </details>
 
+      <button type="button" class="bn-book-trigger" data-book-program="Estimulación temprana" aria-haspopup="dialog" aria-controls="bn-booking" aria-label="Solicitar cita para Estimulación temprana">
+        Solicitar una cita <span aria-hidden="true">↗</span>
+      </button>
     </div>
   </article>
 
@@ -264,6 +267,9 @@
         </div>
       </details>
 
+      <button type="button" class="bn-book-trigger" data-book-program="Pre Nido" aria-haspopup="dialog" aria-controls="bn-booking" aria-label="Solicitar cita para Pre Nido">
+        Solicitar una cita <span aria-hidden="true">↗</span>
+      </button>
     </div>
   </article>
 
@@ -306,6 +312,9 @@
         </div>
       </details>
 
+      <button type="button" class="bn-book-trigger" data-book-program="Nido" aria-haspopup="dialog" aria-controls="bn-booking" aria-label="Solicitar cita para Nido">
+        Solicitar una cita <span aria-hidden="true">↗</span>
+      </button>
     </div>
   </article>
 
@@ -1076,5 +1085,36 @@
   </span>
   <span class="bn-wa-text">Escríbenos</span>
 </a>
+
+    <dialog id="bn-booking" data-lenis-prevent aria-labelledby="bn-book-title" aria-describedby="bn-book-intro">
+      <button type="button" class="bn-book-close" aria-label="Cerrar formulario">×</button>
+      <div class="bn-book-heading">
+        <span class="bn-book-program" id="bn-book-program"></span>
+        <h2 id="bn-book-title">Conversemos.</h2>
+        <p id="bn-book-intro">Tu reunión informativa, gratuita y sin compromiso.</p>
+      </div>
+      <form id="bn-book-form">
+        <div class="bn-book-names">
+          <label>Nombre<input name="nombre" autocomplete="given-name" maxlength="70" required placeholder="Tu nombre"></label>
+          <label>Apellido<input name="apellido" autocomplete="family-name" maxlength="90" required placeholder="Tu apellido"></label>
+        </div>
+        <fieldset>
+          <legend>¿Cómo prefieres reunirnos?</legend>
+          <div class="bn-book-choices">
+            <label><input type="radio" name="modalidad" value="Presencial" required><span><strong>Presencial</strong><small>Conoce nuestro espacio</small></span></label>
+            <label><input type="radio" name="modalidad" value="Virtual por Zoom" required><span><strong>Virtual</strong><small>Conversemos por Zoom</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Elige tu fecha</legend>
+          <div class="bn-book-choices" id="bn-book-dates"></div>
+        </fieldset>
+        <p class="bn-book-reminder" id="bn-book-deadline"></p>
+        <button type="submit" class="bn-book-send">Solicitar por WhatsApp <span aria-hidden="true">↗</span></button>
+        <p class="bn-book-note">La fecha y la hora quedan sujetas a confirmación del equipo. Abriremos WhatsApp con tu solicitud preparada.</p>
+        <p id="bn-book-status" role="status"></p>
+        <a id="bn-book-fallback" target="_blank" rel="noopener noreferrer" hidden>Abrir mi solicitud en WhatsApp ↗</a>
+      </form>
+    </dialog>
   </body>
 </html>

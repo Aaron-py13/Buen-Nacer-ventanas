@@ -1679,3 +1679,108 @@
     iniciarPortada();
   }
 })();
+/* Solicitud de cita: programa definido por la tarjeta elegida. */
+(() => {
+  function iniciarCitas() {
+    const dialog = document.getElementById('bn-booking');
+    const form = document.getElementById('bn-book-form');
+    if (!dialog || !form || dialog.dataset.ready) return;
+    dialog.dataset.ready = 'true';
+    const dates = document.getElementById('bn-book-dates');
+    const status = document.getElementById('bn-book-status');
+    const fallback = document.getElementById('bn-book-fallback');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    let program = '', origin = null, dayKey = '', closeTimer;
+    const dateFormat = new Intl.DateTimeFormat('es-PE', {
+      timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long'
+    });
+    function upcomingDates(now = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(now);
+      const part = name => Number(parts.find(item => item.type === name).value);
+      const today = Date.UTC(part('year'), part('month') - 1, part('day'));
+      return [1, 2].map(offset => {
+        const date = new Date(today + offset * 86400000);
+        return { value: date.toISOString().slice(0, 10), label: dateFormat.format(date) };
+      });
+    }
+    function renderDates() {
+      const options = upcomingDates();
+      dayKey = options[0].value;
+      dates.replaceChildren();
+      options.forEach((option, index) => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio'; radio.name = 'fecha'; radio.value = option.value; radio.required = true;
+        const span = document.createElement('span');
+        const title = document.createElement('strong');
+        title.textContent = index ? 'Pasado mañana' : 'Mañana';
+        const caption = document.createElement('small'); caption.textContent = option.label;
+        span.append(title, caption); label.append(radio, span); dates.append(label);
+      });
+      document.getElementById('bn-book-deadline').textContent =
+        `Puedes solicitar una cita para mañana o pasado mañana. Este plazo de 2 días llega hasta el ${options[1].label}. Sujeto a disponibilidad.`;
+    }
+    function close() {
+      if (!dialog.open || dialog.classList.contains('bn-book-closing')) return;
+      dialog.classList.add('bn-book-closing');
+      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 180);
+    }
+    document.querySelectorAll('[data-book-program]').forEach(button => {
+      button.addEventListener('click', () => {
+        if (dialog.open) return;
+        origin = button; program = button.dataset.bookProgram;
+        clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
+        form.reset(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+        document.getElementById('bn-book-program').textContent = program;
+        renderDates(); dialog.showModal(); document.body.classList.add('bn-book-open');
+        // El cursor de las tarjetas no debe aparecer sobre el formulario.
+        document.documentElement.classList.remove('bn-cursor-on');
+        form.elements.nombre.focus({ preventScroll: true });
+      });
+    });
+    dialog.querySelector('.bn-book-close').addEventListener('click', close);
+    dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
+    dialog.addEventListener('click', event => {
+      if (event.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) close();
+    });
+    dialog.addEventListener('close', () => {
+      clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
+      document.body.classList.remove('bn-book-open');
+      origin?.closest('.program')?.focus({ preventScroll: true });
+      origin?.focus({ preventScroll: true });
+    });
+    form.querySelectorAll('input:not([type=radio])').forEach(input => {
+      input.addEventListener('input', () => input.setCustomValidity(''));
+    });
+    form.addEventListener('change', () => {
+      fallback.hidden = true; status.textContent = '';
+    });
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const options = upcomingDates();
+      if (dayKey !== options[0].value) {
+        renderDates(); status.textContent = 'Cambió el día. Elige nuevamente una de las fechas disponibles.';
+        dates.querySelector('input').focus(); return;
+      }
+      for (const name of ['nombre', 'apellido']) {
+        const input = form.elements[name];
+        input.setCustomValidity(input.value.trim() ? '' : 'Completa este campo.');
+      }
+      if (!form.reportValidity()) return;
+      const data = new FormData(form);
+      const date = options.find(option => option.value === data.get('fecha'));
+      if (!date || !program) return;
+      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nModalidad: ${data.get('modalidad')}.\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
+      const url = `https://wa.me/51966321996?text=${encodeURIComponent(message)}`;
+      fallback.href = url; fallback.hidden = false;
+      status.textContent = 'Solicitud preparada. Envíala en WhatsApp para que el equipo confirme tu cita.';
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarCitas, { once: true });
+  else iniciarCitas();
+})();
