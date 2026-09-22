@@ -792,9 +792,9 @@
 
     function setActiveProgram(index, { focus = false } = {}) {
       if (!programCards.length) return;
-      const next = (index + programCards.length) % programCards.length;
+      const next = index === null ? -1 : (index + programCards.length) % programCards.length;
       const initialized = programCards.some(card => card.classList.contains('is-program-active'));
-      if (initialized && next === requestedProgramIndex && !focus) return;
+      if (next === requestedProgramIndex && !focus && (initialized || next === -1)) return;
       requestedProgramIndex = next;
       clearProgramTransition();
 
@@ -807,11 +807,11 @@
             $$('details[open]', card).forEach(detail => { detail.open = false; });
           }
         });
-        if (focus) programCards[next].focus({ preventScroll: true });
+        if (focus && next >= 0) programCards[next].focus({ preventScroll: true });
         refresh();
       };
 
-      if (!initialized || !programGrid.classList.contains('strip') || disabled() || focus) {
+      if (!programGrid.classList.contains('strip') || disabled() || focus) {
         apply();
         return;
       }
@@ -819,8 +819,8 @@
 
       // Conserva el espacio de lectura mientras las columnas cambian de ancho.
       programGrid.style.minHeight = `${programGrid.getBoundingClientRect().height}px`;
-      programCards[activeProgramIndex].classList.add('bn-copy-switching');
-      programCards[next].classList.add('bn-copy-switching');
+      programCards[activeProgramIndex]?.classList.add('bn-copy-switching');
+      programCards[next]?.classList.add('bn-copy-switching');
       programSwapTimer = setTimeout(() => {
         apply();
         programRevealTimer = setTimeout(() => {
@@ -862,7 +862,14 @@
       const stripGap = parseFloat(getComputedStyle(programGrid).columnGap) || 0;
       const expandedWidth = (programGrid.clientWidth - stripGap * (programCards.length - 1)) * 2.6 / (programCards.length + 1.6);
       programGrid.style.setProperty('--bn-expanded-copy-width', `${expandedWidth}px`);
-      setActiveProgram(activeProgramIndex);
+      if (activeProgramIndex < 0) {
+        // Mide una tarjeta abierta al recalcular el ancho de la ventana.
+        programCards[0].classList.add('is-program-active');
+        programGrid.style.minHeight = `${programGrid.getBoundingClientRect().height}px`;
+        programCards[0].classList.remove('is-program-active');
+      } else {
+        setActiveProgram(activeProgramIndex);
+      }
 
       const dot = document.createElement('div');
       const ring = document.createElement('div');
@@ -889,6 +896,7 @@
         if (!cursorRaf) chase();
       };
       const leave = () => {
+        setActiveProgram(null);
         root.classList.remove('bn-cursor-on');
         if (cursorRaf) cancelAnimationFrame(cursorRaf);
         cursorRaf = 0;
