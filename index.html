@@ -1094,15 +1094,27 @@
         <p id="bn-book-intro">Tu reunión informativa, gratuita y sin compromiso.</p>
       </div>
       <form id="bn-book-form">
-        <div class="bn-book-names">
-          <label>Nombre<input name="nombre" autocomplete="given-name" maxlength="70" required placeholder="Tu nombre"></label>
-          <label>Apellido<input name="apellido" autocomplete="family-name" maxlength="90" required placeholder="Tu apellido"></label>
-        </div>
+        <fieldset>
+          <legend>Datos del papá o mamá</legend>
+          <div class="bn-book-names">
+            <label>Nombre<input name="nombre" autocomplete="section-parent given-name" maxlength="70" required placeholder="Tu nombre"></label>
+            <label>Apellido<input name="apellido" autocomplete="section-parent family-name" maxlength="90" required placeholder="Tu apellido"></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Datos de tu hijo o hija</legend>
+          <div class="bn-book-names">
+            <label>Nombre<input name="nombreHijo" autocomplete="section-child given-name" maxlength="70" required placeholder="Su nombre"></label>
+            <label>Apellido<input name="apellidoHijo" autocomplete="section-child family-name" maxlength="90" required placeholder="Su apellido"></label>
+          </div>
+          <label class="bn-book-age">Edad en meses<input type="number" name="edadMeses" min="0" step="1" inputmode="numeric" required placeholder="Ej.: 8" aria-describedby="bn-book-age-help"></label>
+          <p id="bn-book-age-help">Meses cumplidos. Si tiene menos de un mes, escribe 0.</p>
+        </fieldset>
         <fieldset>
           <legend>¿Cómo prefieres reunirnos?</legend>
           <div class="bn-book-choices">
-            <label><input type="radio" name="modalidad" value="Presencial" required><span><strong>Presencial</strong><small>Conoce nuestro espacio</small></span></label>
-            <label><input type="radio" name="modalidad" value="Virtual por Zoom" required><span><strong>Virtual</strong><small>Conversemos por Zoom</small></span></label>
+            <label><input type="radio" name="modalidad" value="Virtual por Zoom" required><span><strong>Virtual</strong><small>Por Zoom</small><small>9:00 a. m. a 9:00 p. m.</small><small>Atención previa cita</small></span></label>
+            <label><input type="radio" name="modalidad" value="Presencial" required><span><strong>Presencial</strong><small>En nuestra sede</small><small>9:00 a. m. a 5:30 p. m.</small><small>Atención previa cita</small></span></label>
           </div>
         </fieldset>
         <fieldset>
