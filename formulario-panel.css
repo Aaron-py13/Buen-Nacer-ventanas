@@ -1,0 +1,72 @@
+/* Buen Nacer · panel de citas. Reglas limitadas al diálogo existente. */
+#bn-booking{--bn-ink:#193f4a;--bn-muted:#44606a;width:min(1100px,calc(100% - 48px));max-width:none;height:min(860px,calc(100dvh - 48px));max-height:calc(100dvh - 48px);padding:0;margin:auto;border:0;border-radius:24px;background:#fffcf5;color:var(--bn-ink);overflow:hidden;scrollbar-gutter:auto;box-shadow:0 24px 85px #132d3452}
+#bn-booking::backdrop{background:#15313a66;backdrop-filter:blur(5px);animation:bnPanelBackdrop .5s ease both}
+#bn-booking .bn-book-layout{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);height:100%;min-height:0}
+#bn-booking .bn-book-photo{margin:0;min-width:0;min-height:0;overflow:hidden;background:#e2eff1}
+#bn-booking .bn-book-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:0;filter:none;opacity:1}
+#bn-booking .bn-book-content{overflow-y:auto;overscroll-behavior:contain;padding:42px clamp(24px,3vw,46px) 30px;scrollbar-width:thin;scrollbar-color:#b3c7c9 #fffcf5;min-width:0;min-height:0}
+#bn-booking .bn-book-close{position:absolute;z-index:4;right:12px;top:10px;margin:0;width:44px;height:44px;border:0;background:#fffcf5;color:var(--bn-ink);font-size:28px;box-shadow:none}
+#bn-booking .bn-book-close:hover{background:#e7f0f2;transform:rotate(90deg)}
+#bn-booking .bn-book-program{padding:0;margin:0 0 12px;background:none;border-radius:0;color:var(--bn-muted);font-size:14px;font-weight:700}
+#bn-booking h2{font-family:inherit;font-size:clamp(32px,3.5vw,42px);font-weight:800;line-height:1.12;letter-spacing:-1.2px;color:var(--bn-ink);margin:0 0 12px}
+#bn-booking p{color:var(--bn-muted);font-size:15px;line-height:1.6}
+#bn-booking #bn-book-intro{margin:0;max-width:37ch}
+#bn-booking form{margin:25px 0 0;padding:0;background:none;border:0;box-shadow:none}
+#bn-booking fieldset{margin:0 0 23px;border:0;padding:0}
+#bn-booking legend{font-size:16px;line-height:1.4;font-weight:800;color:var(--bn-ink);margin-bottom:12px}
+#bn-booking label{font-size:15px;font-weight:600;line-height:1.5;color:var(--bn-ink)}
+#bn-booking .bn-book-names{gap:18px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#bn-booking input:not([type=radio]){background:transparent;border:0;border-bottom:1px solid #95adb1;border-radius:0;padding:9px 0 11px;margin-top:3px;color:var(--bn-ink);font-family:inherit;font-size:17px;font-weight:600;line-height:1.4;box-shadow:none;width:100%;min-width:0;min-height:46px;transition:border-color .25s,background .25s}
+#bn-booking input:not([type=radio])::placeholder{color:#61777c;opacity:1;font-size:16px;font-weight:400}
+#bn-booking input:not([type=radio]):focus{outline:2px solid #377b92;outline-offset:4px;border-color:#377b92;box-shadow:none;background:#eaf4f64d}
+#bn-booking .bn-book-age{margin-top:14px;max-width:240px}
+#bn-booking #bn-book-age-help{font-size:14px;margin:8px 0 0;color:var(--bn-muted)}
+#bn-booking .bn-book-choices{gap:12px}
+#bn-booking .bn-book-choices label>span{position:relative;padding:14px 12px;min-height:82px;background:transparent;border:1px solid #bdcdd0;border-radius:12px;justify-content:flex-start;box-shadow:none;transition:background .25s,border-color .25s,transform .25s}
+#bn-booking .bn-book-choices strong{font-size:16px;font-weight:800;padding-right:14px}
+#bn-booking .bn-book-choices small{font-size:14px;line-height:1.5;color:var(--bn-muted);margin-top:3px}
+#bn-booking .bn-book-choices input:checked+span{background:#e8f2f5;border-color:#3d798b;box-shadow:none;transform:translateY(-2px)}
+#bn-booking .bn-book-choices input:checked+span:after{content:'✓';position:absolute;right:8px;top:9px;color:#245a65;font-size:16px;font-weight:800}
+#bn-booking .bn-book-choices input:focus-visible+span{outline:3px solid #377b92;outline-offset:3px}
+#bn-booking #bn-book-dates{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#bn-booking #bn-book-dates label>span{padding:12px 10px}
+#bn-booking #bn-book-dates strong{font-size:14px}
+#bn-booking #bn-book-dates small{font-size:13px}
+#bn-booking #bn-book-dates input:checked+span{background:#ffeadb;border-color:#b97850}
+#bn-booking .bn-book-reminder{padding:0;background:none;border:0;border-radius:0;font-size:14px;color:var(--bn-muted);margin:0 0 16px}
+#bn-booking .bn-book-send{background:#ffdbbd;color:#533520;border:1px solid #dbaa88;border-radius:13px;box-shadow:0 3px 0 #e2b894;font-size:17px;font-weight:800;margin-top:15px;min-height:56px;padding:14px 18px}
+#bn-booking .bn-book-send:hover{transform:translateY(-2px);box-shadow:0 5px 0 #e2b894;background:#ffd0aa}
+#bn-booking .bn-book-send:active{transform:translateY(1px);box-shadow:0 1px 0 #e2b894}
+#bn-booking .bn-book-note{font-size:14px;margin-top:14px}
+#bn-booking [hidden]{display:none!important}
+#bn-booking #bn-book-status{font-size:14px}
+#bn-booking .bn-book-success{padding:18px 0 28px;animation:bnPanelContent .45s ease both}
+#bn-booking .bn-book-check{display:grid;place-items:center;width:64px;height:64px;border:1px solid #a4c9bb;border-radius:50%;color:#256951;background:#e8f3ec;font-size:30px;margin:0 0 22px}
+#bn-booking .bn-book-success h3{font-size:30px;line-height:1.2;color:var(--bn-ink);margin:0 0 18px}
+#bn-booking .bn-book-summary{padding:18px 0;border-top:1px solid #d7e0de;border-bottom:1px solid #d7e0de;font-weight:700}
+#bn-booking .bn-book-edit{border:0;background:none;color:var(--bn-ink);padding:10px 0;text-decoration:underline;font:inherit;min-height:44px}
+#bn-booking #bn-book-fallback{display:block;margin:0;padding:15px 18px;background:#ffdbbd;border:1px solid #dbaa88;border-radius:13px;text-align:center;text-decoration:none;font-size:16px;font-weight:800;color:#533520}
+#bn-booking[open]{animation:bnPanelIn .6s cubic-bezier(.2,.8,.2,1) both}
+#bn-booking[open] fieldset{animation:bnPanelContent .45s .2s both}
+#bn-booking[open] .bn-book-photo img{animation:bnPanelPhoto .9s cubic-bezier(.2,.8,.2,1) both}
+#bn-booking.bn-book-closing{animation:bnPanelOut .36s cubic-bezier(.4,0,.8,.4) both;pointer-events:none}
+@keyframes bnPanelIn{from{opacity:0;transform:translateX(70px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes bnPanelOut{to{opacity:0;transform:translateX(65px) scale(.98)}}
+@keyframes bnPanelContent{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes bnPanelPhoto{from{transform:scale(1.06)}to{transform:scale(1)}}
+@keyframes bnPanelBackdrop{from{opacity:0}to{opacity:1}}
+@media(max-width:760px){
+ #bn-booking{width:calc(100% - 20px);height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);border-radius:22px}
+ #bn-booking .bn-book-layout{display:block;overflow-y:auto;overscroll-behavior:contain}
+ #bn-booking .bn-book-photo{height:150px}
+ #bn-booking .bn-book-photo img{object-position:center 38%}
+ #bn-booking .bn-book-content{overflow:visible;padding:26px 22px}
+ #bn-booking .bn-book-close{position:sticky;float:right;top:10px;right:10px;margin-right:10px;margin-bottom:-44px;background:#fffcf5}
+ #bn-booking[open]{animation-name:bnPanelMobileIn}
+ #bn-booking.bn-book-closing{animation-name:bnPanelMobileOut}
+ #bn-booking .bn-book-names{gap:14px}
+}
+@keyframes bnPanelMobileIn{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+@keyframes bnPanelMobileOut{to{opacity:0;transform:translateY(60px)}}
+@media(max-width:380px){#bn-booking .bn-book-content{padding:24px 16px}#bn-booking .bn-book-names{grid-template-columns:1fr}#bn-booking #bn-book-dates{grid-template-columns:1fr}#bn-booking #bn-book-dates label>span{min-height:64px}#bn-booking .bn-book-choices{gap:9px}}
+@media(prefers-reduced-motion:reduce){#bn-booking,#bn-booking *,#bn-booking::backdrop{animation:none!important;transition:none!important}}

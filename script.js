@@ -1689,6 +1689,18 @@
     const dates = document.getElementById('bn-book-dates');
     const status = document.getElementById('bn-book-status');
     const fallback = document.getElementById('bn-book-fallback');
+    const fields = dialog.querySelector('.bn-book-fields');
+    const success = dialog.querySelector('.bn-book-success');
+    const content = dialog.querySelector('.bn-book-content');
+    const summary = dialog.querySelector('.bn-book-summary');
+    function editDetails() {
+      fields.hidden = false; success.hidden = true;
+      fallback.hidden = true; status.textContent = '';
+    }
+    dialog.querySelector('.bn-book-edit').addEventListener('click', () => {
+      editDetails(); form.elements.nombre.focus({ preventScroll: true });
+      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
+    });
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     let program = '', origin = null, dayKey = '', closeTimer;
     const dateFormat = new Intl.DateTimeFormat('es-PE', {
@@ -1725,16 +1737,16 @@
     function close() {
       if (!dialog.open || dialog.classList.contains('bn-book-closing')) return;
       dialog.classList.add('bn-book-closing');
-      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 180);
+      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 360);
     }
     document.querySelectorAll('[data-book-program]').forEach(button => {
       button.addEventListener('click', () => {
         if (dialog.open) return;
         origin = button; program = button.dataset.bookProgram;
         clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
-        form.reset(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+        form.reset(); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
         document.getElementById('bn-book-program').textContent = program;
-        renderDates(); dialog.showModal(); document.body.classList.add('bn-book-open');
+        renderDates(); dialog.showModal(); content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0; document.body.classList.add('bn-book-open');
         // El cursor de las tarjetas no debe aparecer sobre el formulario.
         document.documentElement.classList.remove('bn-cursor-on');
         form.elements.nombre.focus({ preventScroll: true });
@@ -1781,6 +1793,11 @@
       fallback.href = url; fallback.hidden = false;
       status.textContent = 'Solicitud preparada. Envíala en WhatsApp para que el equipo confirme tu cita.';
       window.open(url, '_blank', 'noopener,noreferrer');
+      fields.hidden = true; success.hidden = false;
+      summary.textContent = `${program} · ${data.get('modalidad')} · ${date.label}`;
+      status.textContent = 'Tu solicitud está preparada; aún falta enviarla por WhatsApp.';
+      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
+      dialog.querySelector('#bn-book-success-title').focus({ preventScroll: true });
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarCitas, { once: true });

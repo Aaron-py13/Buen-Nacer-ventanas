@@ -51,6 +51,7 @@
   ]
 }
 </script>
+  <link rel="stylesheet" href="formulario-panel.css">
 </head>
   <body>
 <a class="skip" href="#programas">Saltar al contenido</a>
@@ -1088,12 +1089,19 @@
 
     <dialog id="bn-booking" data-lenis-prevent aria-labelledby="bn-book-title" aria-describedby="bn-book-intro">
       <button type="button" class="bn-book-close" aria-label="Cerrar formulario">×</button>
+      <div class="bn-book-layout">
+        <figure class="bn-book-photo">
+          <!-- Cambia solo este src cuando tengas la nueva foto. -->
+          <img src="assets/estimulacion.jpg" alt="Actividades compartidas en Buen Nacer" decoding="async">
+        </figure>
+        <div class="bn-book-content">
       <div class="bn-book-heading">
         <span class="bn-book-program" id="bn-book-program"></span>
         <h2 id="bn-book-title">Conversemos.</h2>
         <p id="bn-book-intro">Tu reunión informativa, gratuita y sin compromiso.</p>
       </div>
       <form id="bn-book-form">
+        <div class="bn-book-fields">
         <fieldset>
           <legend>Datos del papá o mamá</legend>
           <div class="bn-book-names">
@@ -1124,9 +1132,19 @@
         <p class="bn-book-reminder" id="bn-book-deadline"></p>
         <button type="submit" class="bn-book-send">Solicitar por WhatsApp <span aria-hidden="true">↗</span></button>
         <p class="bn-book-note">La fecha y la hora quedan sujetas a confirmación del equipo. Abriremos WhatsApp con tu solicitud preparada.</p>
+        </div>
         <p id="bn-book-status" role="status"></p>
+        <section class="bn-book-success" aria-labelledby="bn-book-success-title" hidden>
+          <span class="bn-book-check" aria-hidden="true">✓</span>
+          <h3 id="bn-book-success-title" tabindex="-1">Tu solicitud está preparada.</h3>
+          <p>Envía el mensaje por WhatsApp. El equipo confirmará la fecha y el horario de tu reunión.</p>
+          <p class="bn-book-summary"></p>
+          <button type="button" class="bn-book-edit">Volver a mis datos</button>
+        </section>
         <a id="bn-book-fallback" target="_blank" rel="noopener noreferrer" hidden>Abrir mi solicitud en WhatsApp ↗</a>
       </form>
+        </div>
+      </div>
     </dialog>
   </body>
 </html>
