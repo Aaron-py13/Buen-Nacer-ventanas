@@ -1,0 +1,37 @@
+/* Solo portada y ancho del encabezado. Conserva los demás estilos. */
+@media(min-width:1200px){
+ .site-header .header-inner.wrap,.hero .hero-grid.wrap{width:min(1500px,calc(100% - 128px))}
+ .hero .hero-grid{gap:clamp(36px,4vw,72px)}
+}
+.hero .hero-visual--cover{padding-top:52px}
+.hero .hero-visual--cover .badge-scroll{top:-44px;right:8px;pointer-events:none}
+.hero .hero-badge.bn-age-cloud{width:210px;aspect-ratio:240/170;height:auto;display:block;background:none;border:0;border-radius:0;color:#16465e;font-size:16px;line-height:1.25;box-shadow:none;transform:none!important}
+.bn-age-cloud .bn-cloud-arrival,.bn-age-cloud .bn-cloud-body{width:100%;height:100%;position:relative}
+.bn-age-cloud .bn-cloud-body{aspect-ratio:240/170;filter:drop-shadow(0 6px 5px #27617b16)}
+.bn-age-cloud .bn-cloud-shape{width:100%;height:100%;display:block;overflow:visible}
+.bn-age-cloud .bn-cloud-copy{position:absolute;inset:33% 9% 13%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#16465e;font-family:Nunito,Arial,sans-serif;font-size:15px;font-weight:800;text-align:center}
+.hero .bn-age-cloud .bn-cloud-copy strong{font-family:Fredoka,'Arial Rounded MT Bold',Arial,sans-serif;font-size:36px;line-height:1.12;font-weight:600;color:#16465e;white-space:nowrap}
+.bn-age-cloud .bn-cloud-star{position:absolute;color:#e9af34;text-shadow:0 2px 0 #ffe6a5;line-height:1}
+.bn-age-cloud .bn-cloud-star-one{left:5%;top:22%;font-size:28px;transform:rotate(-12deg)}
+.bn-age-cloud .bn-cloud-star-two{right:0;bottom:15%;font-size:23px;transform:rotate(10deg)}
+.bn-age-cloud.bn-cloud-ready .bn-cloud-arrival{animation:bnCloudFromSky 1.65s cubic-bezier(.2,.7,.2,1) both}
+.bn-age-cloud.bn-cloud-ready .bn-cloud-body{animation:bnCloudFloat 6s 1.65s ease-in-out infinite}
+.bn-age-cloud.bn-cloud-outside .bn-cloud-body,.motion-paused .bn-age-cloud .bn-cloud-body{animation-play-state:paused}
+@keyframes bnCloudFromSky{0%{opacity:0;transform:translate(12px,-190px) rotate(-9deg) scale(.92)}65%{opacity:1;transform:translate(-3px,9px) rotate(2deg) scale(1)}85%{transform:translate(1px,-4px) rotate(-1deg)}100%{opacity:1;transform:none}}
+@keyframes bnCloudFloat{0%,100%{transform:translate(0,0) rotate(-1deg)}50%{transform:translate(-7px,-12px) rotate(1.5deg)}}
+@media(max-width:1199px) and (min-width:901px){.hero .hero-badge.bn-age-cloud{width:185px}.hero .bn-age-cloud .bn-cloud-copy strong{font-size:32px}.bn-age-cloud .bn-cloud-copy{font-size:14px}}
+@media(max-width:900px){
+ .hero .hero-visual--cover{padding-top:95px;margin-top:20px}
+ .hero .hero-visual--cover .badge-scroll{top:2px;right:8px}
+ .hero .hero-badge.bn-age-cloud{width:190px}
+ .hero .bn-age-cloud .bn-cloud-copy strong{font-size:33px}
+}
+@media(max-width:600px){
+ .hero .hero-visual--cover{padding-top:95px}
+ .hero .hero-visual--cover .badge-scroll{top:4px;right:4px}
+ .hero .hero-badge.bn-age-cloud{width:166px}
+ .hero .bn-age-cloud .bn-cloud-copy strong{font-size:29px}
+ .bn-age-cloud .bn-cloud-copy{font-size:13px}
+ .bn-age-cloud .bn-cloud-star-one{font-size:23px}.bn-age-cloud .bn-cloud-star-two{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){.bn-age-cloud .bn-cloud-arrival,.bn-age-cloud .bn-cloud-body{animation:none!important;transform:none!important}}
