@@ -2808,3 +2808,45 @@ body.bn-book-open{overflow:hidden}
   #bn-booking #bn-book-dates{grid-template-columns:1fr}
   #bn-booking #bn-book-dates label>span{min-height:64px;padding:10px 12px}
 }
+
+/* SEDES: tarjetas superiores y mapa ancho. Alcance exclusivo #sedes. */
+#sedes .section-heading{position:relative;padding-right:155px;display:block;margin-bottom:28px}
+#sedes .section-heading h2{font-size:clamp(2rem,4vw,3.6rem);line-height:1.12}
+#sedes .section-heading>p{max-width:65ch;margin-top:14px}
+#sedes .bn-sede-art{position:absolute;right:0;bottom:8px;width:140px;height:auto;pointer-events:none}
+#sedes .location-explorer{display:flex;flex-direction:column;gap:18px;min-width:0}
+#sedes .location-select{display:contents}
+#sedes .location-tabs{order:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#sedes .map-panels{order:1;min-width:0}
+#sedes .location-note{order:2;margin:0;font-size:.88rem}
+#sedes .location-tabs button{display:flex;flex-wrap:nowrap;gap:18px;padding:22px 26px;border:1px solid #dcdde6;border-radius:22px;min-width:0;min-height:114px;background:#fffcf8;color:#234f61;box-shadow:0 5px 14px #29465e08;cursor:pointer;transition:transform .25s,box-shadow .25s,background-color .25s}
+#sedes .location-tabs button>span{width:auto}
+#sedes .location-tabs .bn-sede-icon{display:grid;place-items:center;flex:0 0 56px;width:56px;height:62px;border-radius:16px;background:#e1ebef}
+#sedes .bn-sede-icon svg{width:28px;height:32px}
+#sedes .bn-sede-copy{display:flex;flex-direction:column;gap:7px;min-width:0}
+#sedes .location-tabs strong{font-size:clamp(1.35rem,2.4vw,1.9rem);line-height:1.15}
+#sedes .bn-sede-copy>span{font-size:.9rem;line-height:1.4}
+#sedes .bn-sede-copy b{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid currentColor;border-radius:50%;margin-left:6px;vertical-align:middle}
+#sedes .bn-sede-on{display:none}
+#sedes .location-tabs [aria-selected=true]{background:#317c98;color:#fff;border-color:#317c98;box-shadow:0 7px 18px #317c9824}
+#sedes .location-tabs [aria-selected=true] .bn-sede-icon{background:#ffffff26}
+#sedes .location-tabs [aria-selected=true] .bn-sede-on{display:block}
+#sedes .location-tabs [aria-selected=true] .bn-sede-off{display:none}
+#sedes .bn-sede-on b{background:#fff;color:#317c98;border:0}
+#sedes .map-panel{border:1px solid #e5e2e9;border-radius:24px;background:#fff;overflow:hidden}
+#sedes .map-panel[hidden]{display:none!important}
+#sedes .map-panel:not([hidden]){animation:bnSedeReveal .35s ease both}
+#sedes .map-caption{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%)}
+#sedes iframe{height:clamp(260px,30vw,380px);width:100%}
+#sedes .map-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;padding:18px 22px;font-size:1rem}
+#sedes .bn-sede-address{display:flex;align-items:center;gap:12px;min-width:0;overflow-wrap:anywhere;color:#234f61}
+#sedes .bn-sede-address svg{width:24px;height:29px;flex:none}
+#sedes .map-footer a{display:inline-flex;align-items:center;justify-content:center;gap:24px;padding:10px 12px 10px 24px;min-height:50px;background:#ffdbbf;color:#693c24;border:1px solid #efbe9a;border-radius:999px;text-decoration:none;font-size:1rem;box-shadow:0 3px 0 #ebbd9c;transition:transform .25s,box-shadow .25s,background .25s}
+#sedes .bn-route-arrow{display:grid;place-items:center;width:34px;height:34px;background:#fffcf8;border-radius:50%;font-size:23px;transition:transform .25s}
+#sedes .location-tabs button:focus-visible,#sedes .map-footer a:focus-visible{outline:3px solid #b46636;outline-offset:5px}
+@media(hover:hover) and (pointer:fine){#sedes .location-tabs button:hover{transform:translateY(-3px);box-shadow:0 10px 22px #29465e18}#sedes .map-footer a:hover{transform:translateY(-2px);background:#ffd1ac;box-shadow:0 5px 0 #ebbd9c}#sedes .map-footer a:hover .bn-route-arrow{transform:translateX(3px)}}
+#sedes .location-tabs button:active,#sedes .map-footer a:active{transform:translateY(1px)}
+@keyframes bnSedeReveal{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:600px){#sedes .section-heading{padding-right:0}#sedes .bn-sede-art{display:none}#sedes .location-tabs{gap:12px}#sedes .location-tabs button{padding:16px;gap:12px;min-height:106px}#sedes .location-tabs .bn-sede-icon{flex-basis:38px;width:38px;height:48px;border-radius:12px}#sedes .bn-sede-icon svg{width:23px;height:27px}#sedes .bn-sede-copy>span{font-size:.8rem}#sedes .map-footer{padding:18px}#sedes .map-footer a{width:100%}}
+@media(max-width:460px){#sedes .location-tabs{grid-template-columns:1fr}#sedes .location-tabs button{min-height:86px}#sedes .location-tabs strong{font-size:1.4rem}}
+@media(prefers-reduced-motion:reduce){#sedes .map-panel,#sedes .location-tabs button,#sedes .map-footer a,#sedes .bn-route-arrow{animation:none!important;transition:none!important}}
