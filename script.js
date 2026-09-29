@@ -1417,27 +1417,23 @@
       carrusel.dataset.giroInicializado = 'true';
       carrusel.classList.add('bn-cover-ready');
 
-      // Un solo plano: las fotografías nunca se cruzan.
+      // Capas planas para que las imágenes no se atraviesen en el navegador.
       escenario.style.setProperty('transform-style', 'flat', 'important');
       escenario.style.setProperty('perspective', 'none', 'important');
-      escenario.style.setProperty('overflow', 'hidden', 'important');
       tarjetas.forEach(tarjeta => {
-        tarjeta.style.zIndex = '1';
         tarjeta.style.opacity = '1';
         tarjeta.style.willChange = 'transform';
         tarjeta.tabIndex = 0;
         tarjeta.removeAttribute('aria-hidden');
       });
-
       const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      const PIXELES_POR_SEGUNDO = 34;
+      const SEGUNDOS_POR_VUELTA = 18;
       const vuelta = Math.PI * 2;
       const paso = vuelta / tarjetas.length;
 
       let angulo = 0;
-      let separacion = 1;
-      let recorrido = 1;
+      let radio = 0;
       let visible = false;
       let frame = 0;
       let tiempoAnterior = null;
@@ -1453,19 +1449,30 @@
       function medir() {
         const ancho = escenario.clientWidth;
         if (!ancho) return;
-        // Conserva una separación real incluso en pantallas pequeñas.
-        const anchoTarjeta = Math.min(320, ancho * 0.56, escenario.clientHeight * 0.70);
-        tarjetas.forEach(tarjeta => tarjeta.style.width = `${anchoTarjeta}px`);
-        separacion = anchoTarjeta + Math.max(16, ancho * 0.025);
-        recorrido = separacion * tarjetas.length;
+        // Mantiene el aspecto de rueda y deja espacio al relevo frontal.
+        const anchoFoto = Math.min(320, ancho * 0.44);
+        tarjetas.forEach(tarjeta => tarjeta.style.width = `${anchoFoto}px`);
+        radio = Math.max(0, ancho / 2 - 8 - anchoFoto * 0.405);
         dibujar();
       }
 
       function dibujar() {
-        tarjetas.forEach((tarjeta, indice) => {
-          const fase = angulo / vuelta * recorrido + indice * separacion;
-          const x = ((fase + recorrido / 2) % recorrido + recorrido) % recorrido - recorrido / 2;
-          tarjeta.style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, 0)`;
+        const posiciones = tarjetas.map((tarjeta, indice) => {
+          const posicion = angulo + indice * paso;
+          const profundidad = Math.cos(posicion);
+          const lateral = Math.sin(posicion);
+          // Curva continua: abre los lados para cambiar las capas sin tapar otra foto.
+          const x = Math.tanh(2 * lateral) / Math.tanh(2) * radio;
+          const escala = 0.81 + profundidad * 0.19;
+          return { tarjeta, profundidad, x, escala };
+        });
+        const orden = [...posiciones].sort((a,b) => a.profundidad - b.profundidad);
+        orden.forEach(({tarjeta}, indice) => {
+          const capa = String(indice + 1);
+          if (tarjeta.style.zIndex !== capa) tarjeta.style.zIndex = capa;
+        });
+        posiciones.forEach(({tarjeta, profundidad, x, escala}) => {
+          tarjeta.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${profundidad * 14}px, 0) scale(${escala})`;
         });
       }
 
@@ -1495,7 +1502,7 @@
 
         if (tiempoAnterior !== null) {
           const segundos = Math.min((tiempo - tiempoAnterior) / 1000, 0.05);
-          angulo = (angulo + segundos * vuelta * PIXELES_POR_SEGUNDO / recorrido) % vuelta;
+          angulo = (angulo + segundos * vuelta / SEGUNDOS_POR_VUELTA) % vuelta;
         }
 
         tiempoAnterior = tiempo;
@@ -1527,8 +1534,8 @@
         const dx = punto.clientX - toque.x;
         const dy = punto.clientY - toque.y;
 
-        if (!sinMovimiento() && Math.abs(dx) > Math.abs(dy) * 1.3) {
-          angulo = toque.angulo + dx / recorrido * vuelta;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          angulo = toque.angulo + dx * 0.009;
           dibujar();
         }
       }, { passive: true });
