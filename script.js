@@ -1417,9 +1417,20 @@
       carrusel.dataset.giroInicializado = 'true';
       carrusel.classList.add('bn-cover-ready');
 
+      // Profundidad continua, sin saltos de z-index ni cambios de opacidad.
+      escenario.style.setProperty('transform-style', 'preserve-3d', 'important');
+      escenario.style.perspective = '1000px';
+      tarjetas.forEach(tarjeta => {
+        tarjeta.style.zIndex = 'auto';
+        tarjeta.style.opacity = '1';
+        tarjeta.style.willChange = 'transform';
+        tarjeta.tabIndex = 0;
+        tarjeta.removeAttribute('aria-hidden');
+      });
+
       const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      const SEGUNDOS_POR_VUELTA = 10;
+      const SEGUNDOS_POR_VUELTA = 18;
       const vuelta = Math.PI * 2;
       const paso = vuelta / tarjetas.length;
 
@@ -1429,21 +1440,12 @@
       let frame = 0;
       let tiempoAnterior = null;
       let toque = null;
-      let frontalAnterior = null;
-      let puente = null;
 
       function sinMovimiento() {
         return (
           reducido.matches ||
           document.documentElement.classList.contains('motion-off')
         );
-      }
-
-      function eliminarPuente() {
-        if (!puente) return;
-        puente.animacion.cancel();
-        puente.elemento.remove();
-        puente = null;
       }
 
       function medir() {
@@ -1461,79 +1463,17 @@
         dibujar(false);
       }
 
-      function dibujar(suavizar = true) {
-        let frontal = null;
-        let mayorProfundidad = -Infinity;
-
+      // Cada foto permanece en el DOM: no hay copias ni fundidos.
+      function dibujar() {
         tarjetas.forEach((tarjeta, indice) => {
           const posicion = angulo + indice * paso;
           const profundidad = Math.cos(posicion);
           const lateral = Math.sin(posicion);
-
-          const escala = 0.81 + profundidad * 0.19;
-          const x = lateral * radio;
-          const y = profundidad * 14;
-          const inclinacion = lateral * -6;
-
-          tarjeta.style.transform = `
-            translate(-50%, -50%)
-            translate(${x}px, ${y}px)
-            scale(${escala})
-            rotateY(${inclinacion}deg)
-          `;
-
-          tarjeta.style.opacity = '1';
-          tarjeta.style.zIndex = String(Math.round((profundidad + 1) * 100));
-          tarjeta.style.pointerEvents = 'auto';
-          tarjeta.tabIndex = 0;
-          tarjeta.removeAttribute('aria-hidden');
-
-          if (profundidad > mayorProfundidad) {
-            mayorProfundidad = profundidad;
-            frontal = tarjeta;
-          }
+          const z = profundidad * 60;
+          // Compensa perspectiva para conservar el tamaño anterior.
+          const escala = (0.81 + profundidad * 0.19) * (1 - z / 1000);
+          tarjeta.style.transform = `translate(-50%, -50%) translate3d(${lateral * radio}px, ${profundidad * 14}px, ${z}px) scale(${escala})`;
         });
-
-        /*
-         * Suaviza el cambio de la tarjeta delantera.
-         * La copia se crea solamente cuando cambia,
-         * no en cada fotograma.
-         */
-        if (suavizar && frontalAnterior && frontal !== frontalAnterior && !sinMovimiento()) {
-          eliminarPuente();
-
-          const original = frontalAnterior;
-          const copia = original.cloneNode(true);
-
-          copia.removeAttribute('id');
-          copia.removeAttribute('aria-current');
-          copia.setAttribute('aria-hidden', 'true');
-          copia.tabIndex = -1;
-          copia.disabled = true;
-
-          copia.style.zIndex = '500';
-          copia.style.pointerEvents = 'none';
-
-          escenario.appendChild(copia);
-
-          const animacion = copia.animate(
-            [{ opacity: 1 }, { opacity: 0 }],
-            { duration: 650, easing: 'ease-in-out', fill: 'forwards' }
-          );
-
-          puente = { original, elemento: copia, animacion };
-
-          animacion.onfinish = () => {
-            copia.remove();
-            if (puente?.elemento === copia) puente = null;
-          };
-        }
-
-        if (puente) {
-          puente.elemento.style.transform = puente.original.style.transform;
-        }
-
-        frontalAnterior = frontal;
       }
 
       function puedeGirar() {
@@ -1571,7 +1511,6 @@
       }
 
       function actualizarMovimiento() {
-        if (sinMovimiento()) eliminarPuente();
 
         if (!puedeGirar()) {
           detener();
@@ -1585,7 +1524,6 @@
       escenario.addEventListener('touchstart', (evento) => {
         const punto = evento.changedTouches[0];
         toque = { x: punto.clientX, y: punto.clientY, angulo };
-        eliminarPuente();
         detener();
       }, { passive: true });
 
@@ -1596,7 +1534,7 @@
         const dx = punto.clientX - toque.x;
         const dy = punto.clientY - toque.y;
 
-        if (Math.abs(dx) > Math.abs(dy)) {
+        if (!sinMovimiento() && Math.abs(dx) > Math.abs(dy) * 1.3) {
           angulo = toque.angulo + dx * 0.009;
           dibujar();
         }
@@ -1632,7 +1570,6 @@
         if (evento.key !== 'ArrowRight' && evento.key !== 'ArrowLeft') return;
 
         evento.preventDefault();
-        eliminarPuente();
 
         const indice = tarjetas.indexOf(document.activeElement);
         const direccion = evento.key === 'ArrowRight' ? 1 : -1;
