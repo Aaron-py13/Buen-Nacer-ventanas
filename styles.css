@@ -2850,3 +2850,8 @@ body.bn-book-open{overflow:hidden}
 @media(max-width:600px){#sedes .section-heading{padding-right:0}#sedes .bn-sede-art{display:none}#sedes .location-tabs{gap:12px}#sedes .location-tabs button{padding:16px;gap:12px;min-height:106px}#sedes .location-tabs .bn-sede-icon{flex-basis:38px;width:38px;height:48px;border-radius:12px}#sedes .bn-sede-icon svg{width:23px;height:27px}#sedes .bn-sede-copy>span{font-size:.8rem}#sedes .map-footer{padding:18px}#sedes .map-footer a{width:100%}}
 @media(max-width:460px){#sedes .location-tabs{grid-template-columns:1fr}#sedes .location-tabs button{min-height:86px}#sedes .location-tabs strong{font-size:1.4rem}}
 @media(prefers-reduced-motion:reduce){#sedes .map-panel,#sedes .location-tabs button,#sedes .map-footer a,#sedes .bn-route-arrow{animation:none!important;transition:none!important}}
+
+/* Casita estática: tamaño discreto y encabezado compacto. */
+#sedes .section-heading{padding-right:180px;min-height:0}
+#sedes .bn-sede-art{width:165px;bottom:8px;transform:none!important;translate:none!important;scale:none!important;animation:none!important;transition:none!important}
+@media(max-width:600px){#sedes .section-heading{padding-right:0}#sedes .bn-sede-art{display:none}}

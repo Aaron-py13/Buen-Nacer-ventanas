@@ -1417,18 +1417,9 @@
       carrusel.dataset.giroInicializado = 'true';
       carrusel.classList.add('bn-cover-ready');
 
-      // Capas planas para que las imágenes no se atraviesen en el navegador.
-      escenario.style.setProperty('transform-style', 'flat', 'important');
-      escenario.style.setProperty('perspective', 'none', 'important');
-      tarjetas.forEach(tarjeta => {
-        tarjeta.style.opacity = '1';
-        tarjeta.style.willChange = 'transform';
-        tarjeta.tabIndex = 0;
-        tarjeta.removeAttribute('aria-hidden');
-      });
       const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      const SEGUNDOS_POR_VUELTA = 18;
+      const SEGUNDOS_POR_VUELTA = 10;
       const vuelta = Math.PI * 2;
       const paso = vuelta / tarjetas.length;
 
@@ -1438,6 +1429,8 @@
       let frame = 0;
       let tiempoAnterior = null;
       let toque = null;
+      let frontalAnterior = null;
+      let puente = null;
 
       function sinMovimiento() {
         return (
@@ -1446,34 +1439,101 @@
         );
       }
 
-      function medir() {
-        const ancho = escenario.clientWidth;
-        if (!ancho) return;
-        // Mantiene el aspecto de rueda y deja espacio al relevo frontal.
-        const anchoFoto = Math.min(320, ancho * 0.44);
-        tarjetas.forEach(tarjeta => tarjeta.style.width = `${anchoFoto}px`);
-        radio = Math.max(0, ancho / 2 - 8 - anchoFoto * 0.405);
-        dibujar();
+      function eliminarPuente() {
+        if (!puente) return;
+        puente.animacion.cancel();
+        puente.elemento.remove();
+        puente = null;
       }
 
-      function dibujar() {
-        const posiciones = tarjetas.map((tarjeta, indice) => {
+      function medir() {
+        const mitad = tarjetas[0].offsetWidth / 2;
+
+        const espacio = Math.max(
+          0,
+          escenario.clientWidth / 2 - 18 - mitad * 0.81
+        );
+
+        radio = Math.sqrt(
+          Math.max(0, espacio * espacio - Math.pow(mitad * 0.19, 2))
+        );
+
+        dibujar(false);
+      }
+
+      function dibujar(suavizar = true) {
+        let frontal = null;
+        let mayorProfundidad = -Infinity;
+
+        tarjetas.forEach((tarjeta, indice) => {
           const posicion = angulo + indice * paso;
           const profundidad = Math.cos(posicion);
           const lateral = Math.sin(posicion);
-          // Curva continua: abre los lados para cambiar las capas sin tapar otra foto.
-          const x = Math.tanh(2 * lateral) / Math.tanh(2) * radio;
+
           const escala = 0.81 + profundidad * 0.19;
-          return { tarjeta, profundidad, x, escala };
+          const x = lateral * radio;
+          const y = profundidad * 14;
+          const inclinacion = lateral * -6;
+
+          tarjeta.style.transform = `
+            translate(-50%, -50%)
+            translate(${x}px, ${y}px)
+            scale(${escala})
+            rotateY(${inclinacion}deg)
+          `;
+
+          tarjeta.style.opacity = '1';
+          tarjeta.style.zIndex = String(Math.round((profundidad + 1) * 100));
+          tarjeta.style.pointerEvents = 'auto';
+          tarjeta.tabIndex = 0;
+          tarjeta.removeAttribute('aria-hidden');
+
+          if (profundidad > mayorProfundidad) {
+            mayorProfundidad = profundidad;
+            frontal = tarjeta;
+          }
         });
-        const orden = [...posiciones].sort((a,b) => a.profundidad - b.profundidad);
-        orden.forEach(({tarjeta}, indice) => {
-          const capa = String(indice + 1);
-          if (tarjeta.style.zIndex !== capa) tarjeta.style.zIndex = capa;
-        });
-        posiciones.forEach(({tarjeta, profundidad, x, escala}) => {
-          tarjeta.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${profundidad * 14}px, 0) scale(${escala})`;
-        });
+
+        /*
+         * Suaviza el cambio de la tarjeta delantera.
+         * La copia se crea solamente cuando cambia,
+         * no en cada fotograma.
+         */
+        if (suavizar && frontalAnterior && frontal !== frontalAnterior && !sinMovimiento()) {
+          eliminarPuente();
+
+          const original = frontalAnterior;
+          const copia = original.cloneNode(true);
+
+          copia.removeAttribute('id');
+          copia.removeAttribute('aria-current');
+          copia.setAttribute('aria-hidden', 'true');
+          copia.tabIndex = -1;
+          copia.disabled = true;
+
+          copia.style.zIndex = '500';
+          copia.style.pointerEvents = 'none';
+
+          escenario.appendChild(copia);
+
+          const animacion = copia.animate(
+            [{ opacity: 1 }, { opacity: 0 }],
+            { duration: 650, easing: 'ease-in-out', fill: 'forwards' }
+          );
+
+          puente = { original, elemento: copia, animacion };
+
+          animacion.onfinish = () => {
+            copia.remove();
+            if (puente?.elemento === copia) puente = null;
+          };
+        }
+
+        if (puente) {
+          puente.elemento.style.transform = puente.original.style.transform;
+        }
+
+        frontalAnterior = frontal;
       }
 
       function puedeGirar() {
@@ -1511,6 +1571,7 @@
       }
 
       function actualizarMovimiento() {
+        if (sinMovimiento()) eliminarPuente();
 
         if (!puedeGirar()) {
           detener();
@@ -1524,6 +1585,7 @@
       escenario.addEventListener('touchstart', (evento) => {
         const punto = evento.changedTouches[0];
         toque = { x: punto.clientX, y: punto.clientY, angulo };
+        eliminarPuente();
         detener();
       }, { passive: true });
 
@@ -1570,6 +1632,7 @@
         if (evento.key !== 'ArrowRight' && evento.key !== 'ArrowLeft') return;
 
         evento.preventDefault();
+        eliminarPuente();
 
         const indice = tarjetas.indexOf(document.activeElement);
         const direccion = evento.key === 'ArrowRight' ? 1 : -1;
@@ -1626,54 +1689,7 @@
     const dates = document.getElementById('bn-book-dates');
     const status = document.getElementById('bn-book-status');
     const fallback = document.getElementById('bn-book-fallback');
-    const fields = dialog.querySelector('.bn-book-fields');
-    const success = dialog.querySelector('.bn-book-success');
-    const content = dialog.querySelector('.bn-book-content');
-    const summary = dialog.querySelector('.bn-book-summary');
-    function editDetails() {
-      fields.hidden = false; success.hidden = true;
-      fallback.hidden = true; status.textContent = '';
-    }
-    dialog.querySelector('.bn-book-edit').addEventListener('click', () => {
-      editDetails(); form.elements.nombre.focus({ preventScroll: true });
-      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
-    });
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-    const branches = document.getElementById('bn-book-branches');
-    let branchAnimation = null;
-    function updateBranches(animate = true) {
-      if (!branches) return;
-      const show = form.elements.modalidad.value === 'Presencial';
-      branchAnimation?.cancel();
-      branchAnimation = null;
-      branches.disabled = !show;
-      branches.inert = !show;
-      branches.querySelectorAll('input').forEach(input => {
-        input.required = show;
-        if (!show) input.checked = false;
-      });
-      const wasHidden = branches.hidden;
-      if (!animate || reduced.matches || typeof branches.animate !== 'function' || (!show && wasHidden)) {
-        branches.hidden = !show;
-        return;
-      }
-      branches.hidden = false;
-      const height = branches.getBoundingClientRect().height;
-      const margin = getComputedStyle(branches).marginBottom;
-      const closed = { height: '0px', opacity: 0, marginBottom: '0px' };
-      const opened = { height: `${height}px`, opacity: 1, marginBottom: margin };
-      branchAnimation = branches.animate(show ? [closed, opened] : [opened, closed], {
-        duration: 320, easing: 'cubic-bezier(.22,1,.36,1)'
-      });
-      branchAnimation.onfinish = () => {
-        branches.hidden = !show;
-        branchAnimation = null;
-      };
-    }
-    form.querySelectorAll('[name="modalidad"]').forEach(input => {
-      input.addEventListener('change', () => updateBranches());
-    });
-    reduced.addEventListener('change', () => updateBranches(false));
     let program = '', origin = null, dayKey = '', closeTimer;
     const dateFormat = new Intl.DateTimeFormat('es-PE', {
       timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long'
@@ -1684,7 +1700,7 @@
       }).formatToParts(now);
       const part = name => Number(parts.find(item => item.type === name).value);
       const today = Date.UTC(part('year'), part('month') - 1, part('day'));
-      return [0, 1, 2].map(offset => {
+      return [1, 2].map(offset => {
         const date = new Date(today + offset * 86400000);
         return { value: date.toISOString().slice(0, 10), label: dateFormat.format(date) };
       });
@@ -1699,26 +1715,26 @@
         radio.type = 'radio'; radio.name = 'fecha'; radio.value = option.value; radio.required = true;
         const span = document.createElement('span');
         const title = document.createElement('strong');
-        title.textContent = ['Hoy', 'Mañana', 'Pasado mañana'][index];
+        title.textContent = index ? 'Pasado mañana' : 'Mañana';
         const caption = document.createElement('small'); caption.textContent = option.label;
         span.append(title, caption); label.append(radio, span); dates.append(label);
       });
       document.getElementById('bn-book-deadline').textContent =
-        `Puedes solicitar una cita para hoy, mañana o pasado mañana, hasta el ${options[2].label}. La fecha y la hora están sujetas a disponibilidad y confirmación del equipo.`;
+        `Puedes solicitar una cita para mañana o pasado mañana. Este plazo de 2 días llega hasta el ${options[1].label}. Sujeto a disponibilidad.`;
     }
     function close() {
       if (!dialog.open || dialog.classList.contains('bn-book-closing')) return;
       dialog.classList.add('bn-book-closing');
-      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 360);
+      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 180);
     }
     document.querySelectorAll('[data-book-program]').forEach(button => {
       button.addEventListener('click', () => {
         if (dialog.open) return;
         origin = button; program = button.dataset.bookProgram;
         clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
-        form.reset(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+        form.reset(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
         document.getElementById('bn-book-program').textContent = program;
-        renderDates(); dialog.showModal(); content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0; document.body.classList.add('bn-book-open');
+        renderDates(); dialog.showModal(); document.body.classList.add('bn-book-open');
         // El cursor de las tarjetas no debe aparecer sobre el formulario.
         document.documentElement.classList.remove('bn-cursor-on');
         form.elements.nombre.focus({ preventScroll: true });
@@ -1750,27 +1766,19 @@
         renderDates(); status.textContent = 'Cambió el día. Elige nuevamente una de las fechas disponibles.';
         dates.querySelector('input').focus(); return;
       }
-      for (const name of ['nombre', 'apellido', 'nombreHijo', 'apellidoHijo']) {
+      for (const name of ['nombre', 'apellido']) {
         const input = form.elements[name];
         input.setCustomValidity(input.value.trim() ? '' : 'Completa este campo.');
       }
-      const age = form.elements.edadMeses;
-      age.setCustomValidity(age.value !== '' && Number.isInteger(age.valueAsNumber) && age.valueAsNumber >= 0 ? '' : 'Escribe la edad en meses completos, desde 0.');
       if (!form.reportValidity()) return;
       const data = new FormData(form);
       const date = options.find(option => option.value === data.get('fecha'));
       if (!date || !program) return;
-      const branchLine = data.get('modalidad') === 'Presencial' ? `\nSede: ${data.get('sedeCita')}.` : '';
-      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nNombre de mi hijo o hija: ${data.get('nombreHijo').trim()} ${data.get('apellidoHijo').trim()}.\nEdad: ${Number(data.get('edadMeses'))} meses.\nModalidad: ${data.get('modalidad')}.${branchLine}\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
+      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nModalidad: ${data.get('modalidad')}.\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
       const url = `https://wa.me/51966321996?text=${encodeURIComponent(message)}`;
       fallback.href = url; fallback.hidden = false;
       status.textContent = 'Solicitud preparada. Envíala en WhatsApp para que el equipo confirme tu cita.';
       window.open(url, '_blank', 'noopener,noreferrer');
-      fields.hidden = true; success.hidden = false;
-      summary.textContent = `${program} · ${data.get('modalidad')}${data.get('modalidad') === 'Presencial' ? ` · ${data.get('sedeCita')}` : ''} · ${date.label}`;
-      status.textContent = 'Tu solicitud está preparada; aún falta enviarla por WhatsApp.';
-      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
-      dialog.querySelector('#bn-book-success-title').focus({ preventScroll: true });
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarCitas, { once: true });
