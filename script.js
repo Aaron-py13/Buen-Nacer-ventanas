@@ -1689,7 +1689,54 @@
     const dates = document.getElementById('bn-book-dates');
     const status = document.getElementById('bn-book-status');
     const fallback = document.getElementById('bn-book-fallback');
+    const fields = dialog.querySelector('.bn-book-fields');
+    const success = dialog.querySelector('.bn-book-success');
+    const content = dialog.querySelector('.bn-book-content');
+    const summary = dialog.querySelector('.bn-book-summary');
+    function editDetails() {
+      fields.hidden = false; success.hidden = true;
+      fallback.hidden = true; status.textContent = '';
+    }
+    dialog.querySelector('.bn-book-edit').addEventListener('click', () => {
+      editDetails(); form.elements.nombre.focus({ preventScroll: true });
+      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
+    });
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const branches = document.getElementById('bn-book-branches');
+    let branchAnimation = null;
+    function updateBranches(animate = true) {
+      if (!branches) return;
+      const show = form.elements.modalidad.value === 'Presencial';
+      branchAnimation?.cancel();
+      branchAnimation = null;
+      branches.disabled = !show;
+      branches.inert = !show;
+      branches.querySelectorAll('input').forEach(input => {
+        input.required = show;
+        if (!show) input.checked = false;
+      });
+      const wasHidden = branches.hidden;
+      if (!animate || reduced.matches || typeof branches.animate !== 'function' || (!show && wasHidden)) {
+        branches.hidden = !show;
+        return;
+      }
+      branches.hidden = false;
+      const height = branches.getBoundingClientRect().height;
+      const margin = getComputedStyle(branches).marginBottom;
+      const closed = { height: '0px', opacity: 0, marginBottom: '0px' };
+      const opened = { height: `${height}px`, opacity: 1, marginBottom: margin };
+      branchAnimation = branches.animate(show ? [closed, opened] : [opened, closed], {
+        duration: 320, easing: 'cubic-bezier(.22,1,.36,1)'
+      });
+      branchAnimation.onfinish = () => {
+        branches.hidden = !show;
+        branchAnimation = null;
+      };
+    }
+    form.querySelectorAll('[name="modalidad"]').forEach(input => {
+      input.addEventListener('change', () => updateBranches());
+    });
+    reduced.addEventListener('change', () => updateBranches(false));
     let program = '', origin = null, dayKey = '', closeTimer;
     const dateFormat = new Intl.DateTimeFormat('es-PE', {
       timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long'
@@ -1700,7 +1747,7 @@
       }).formatToParts(now);
       const part = name => Number(parts.find(item => item.type === name).value);
       const today = Date.UTC(part('year'), part('month') - 1, part('day'));
-      return [1, 2].map(offset => {
+      return [0, 1, 2].map(offset => {
         const date = new Date(today + offset * 86400000);
         return { value: date.toISOString().slice(0, 10), label: dateFormat.format(date) };
       });
@@ -1715,26 +1762,26 @@
         radio.type = 'radio'; radio.name = 'fecha'; radio.value = option.value; radio.required = true;
         const span = document.createElement('span');
         const title = document.createElement('strong');
-        title.textContent = index ? 'Pasado mañana' : 'Mañana';
+        title.textContent = ['Hoy', 'Mañana', 'Pasado mañana'][index];
         const caption = document.createElement('small'); caption.textContent = option.label;
         span.append(title, caption); label.append(radio, span); dates.append(label);
       });
       document.getElementById('bn-book-deadline').textContent =
-        `Puedes solicitar una cita para mañana o pasado mañana. Este plazo de 2 días llega hasta el ${options[1].label}. Sujeto a disponibilidad.`;
+        `Puedes solicitar una cita para hoy, mañana o pasado mañana, hasta el ${options[2].label}. La fecha y la hora están sujetas a disponibilidad y confirmación del equipo.`;
     }
     function close() {
       if (!dialog.open || dialog.classList.contains('bn-book-closing')) return;
       dialog.classList.add('bn-book-closing');
-      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 180);
+      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 360);
     }
     document.querySelectorAll('[data-book-program]').forEach(button => {
       button.addEventListener('click', () => {
         if (dialog.open) return;
         origin = button; program = button.dataset.bookProgram;
         clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
-        form.reset(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+        form.reset(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
         document.getElementById('bn-book-program').textContent = program;
-        renderDates(); dialog.showModal(); document.body.classList.add('bn-book-open');
+        renderDates(); dialog.showModal(); content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0; document.body.classList.add('bn-book-open');
         // El cursor de las tarjetas no debe aparecer sobre el formulario.
         document.documentElement.classList.remove('bn-cursor-on');
         form.elements.nombre.focus({ preventScroll: true });
@@ -1766,19 +1813,27 @@
         renderDates(); status.textContent = 'Cambió el día. Elige nuevamente una de las fechas disponibles.';
         dates.querySelector('input').focus(); return;
       }
-      for (const name of ['nombre', 'apellido']) {
+      for (const name of ['nombre', 'apellido', 'nombreHijo', 'apellidoHijo']) {
         const input = form.elements[name];
         input.setCustomValidity(input.value.trim() ? '' : 'Completa este campo.');
       }
+      const age = form.elements.edadMeses;
+      age.setCustomValidity(age.value !== '' && Number.isInteger(age.valueAsNumber) && age.valueAsNumber >= 0 ? '' : 'Escribe la edad en meses completos, desde 0.');
       if (!form.reportValidity()) return;
       const data = new FormData(form);
       const date = options.find(option => option.value === data.get('fecha'));
       if (!date || !program) return;
-      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nModalidad: ${data.get('modalidad')}.\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
+      const branchLine = data.get('modalidad') === 'Presencial' ? `\nSede: ${data.get('sedeCita')}.` : '';
+      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nNombre de mi hijo o hija: ${data.get('nombreHijo').trim()} ${data.get('apellidoHijo').trim()}.\nEdad: ${Number(data.get('edadMeses'))} meses.\nModalidad: ${data.get('modalidad')}.${branchLine}\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
       const url = `https://wa.me/51966321996?text=${encodeURIComponent(message)}`;
       fallback.href = url; fallback.hidden = false;
       status.textContent = 'Solicitud preparada. Envíala en WhatsApp para que el equipo confirme tu cita.';
       window.open(url, '_blank', 'noopener,noreferrer');
+      fields.hidden = true; success.hidden = false;
+      summary.textContent = `${program} · ${data.get('modalidad')}${data.get('modalidad') === 'Presencial' ? ` · ${data.get('sedeCita')}` : ''} · ${date.label}`;
+      status.textContent = 'Tu solicitud está preparada; aún falta enviarla por WhatsApp.';
+      content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0;
+      dialog.querySelector('#bn-book-success-title').focus({ preventScroll: true });
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarCitas, { once: true });
