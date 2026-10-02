@@ -1,0 +1,50 @@
+/* Solo el video ampliado. No altera las tarjetas ni otros formularios. */
+#story-dialog .story-dialog-inner {
+  width: min(92vw, 440px, calc(78vh * 9 / 16));
+  width: min(92vw, 440px, calc(78dvh * 9 / 16));
+  aspect-ratio: 9 / 16;
+  max-height: 78vh;
+  max-height: 78dvh;
+  isolation: isolate;
+}
+#story-dialog #story-dialog-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #101916;
+  border-radius: 20px;
+  box-shadow: 0 28px 80px #0007;
+}
+#story-dialog::backdrop {
+  background: rgb(9 28 23 / 86%);
+  backdrop-filter: blur(8px);
+}
+/* Los controles nativos incluyen sonido: evita dos botones superpuestos. */
+#story-dialog #story-dialog-sound { display: none; }
+#story-dialog #story-dialog-close {
+  top: -54px;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  background: #fffaf1;
+  color: #244e41;
+  border: 1px solid #ffffff80;
+  font-size: 28px;
+  box-shadow: 0 6px 20px #0002;
+}
+#story-dialog #story-dialog-close:focus-visible {
+  outline: 3px solid #f8be88;
+  outline-offset: 4px;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  #story-dialog .story-dialog-inner {
+    width: min(65vw, calc(88vh * 9 / 16));
+    width: min(65vw, calc(88dvh * 9 / 16));
+    max-height: 88vh;
+    max-height: 88dvh;
+  }
+  #story-dialog #story-dialog-close { top: 0; right: -54px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #story-dialog #story-dialog-close { transition: none; }
+}
