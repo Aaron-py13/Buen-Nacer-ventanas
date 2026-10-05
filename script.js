@@ -1462,7 +1462,6 @@
       }
 
       function dibujar() {
-
   tarjetas.forEach((tarjeta, indice) => {
 
     const posicion = angulo + indice * paso;
@@ -1475,22 +1474,25 @@
     const x = lateral * radio;
     const y = profundidad * 14;
 
+    /* profundidad 3D real */
+    const z = profundidad * 45;
+
     const inclinacion = lateral * -6;
 
     tarjeta.style.transform = `
       translate(-50%, -50%)
-      translate3d(${x}px, ${y}px, 0)
+      translate3d(${x}px, ${y}px, ${z}px)
       scale(${escala})
       rotateY(${inclinacion}deg)
     `;
 
     tarjeta.style.opacity = '1';
 
-    tarjeta.style.zIndex =
-      String(Math.round((profundidad + 1) * 100));
+    /* IMPORTANTE:
+       ya NO usamos z-index para cambiar de tarjeta */
+    tarjeta.style.zIndex = '';
 
     tarjeta.style.pointerEvents = 'auto';
-
     tarjeta.tabIndex = 0;
     tarjeta.removeAttribute('aria-hidden');
   });
