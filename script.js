@@ -1399,7 +1399,9 @@
    CARRUSEL DE PORTADA — MOTOR ÚNICO Y FLUIDO
    Solo este bloque controla .bn-cover.
    - Sin clones ni fades extra.
-   - Capas únicas para evitar saltos por z-index empatados.
+   - Capas únicas para evitar empates de z-index.
+   - Separación automática en el punto de cruce para que una tarjeta
+     no corte de golpe encima de otra.
    - requestAnimationFrame único, sin bucles duplicados.
    - Limita saltos si el navegador pierde algún fotograma.
    ══════════════════════════════════════════════════════════ */
@@ -1460,15 +1462,49 @@
       }
 
       function medir() {
-        const mitad = tarjetas[0].offsetWidth / 2;
+        const anchoTarjeta = tarjetas[0].offsetWidth;
+        const mitad = anchoTarjeta / 2;
 
+        /* Radio original del carrusel */
         const espacio = Math.max(
           0,
           escenario.clientWidth / 2 - 18 - mitad * 0.81
         );
 
-        radio = Math.sqrt(
+        const radioBase = Math.sqrt(
           Math.max(0, espacio * espacio - Math.pow(mitad * 0.19, 2))
+        );
+
+        /*
+         * CORRECCIÓN DEL "SALTO" AL CRUZARSE DOS TARJETAS
+         *
+         * El salto aparecía exactamente cuando dos tarjetas tenían casi la
+         * misma profundidad: el z-index debía cambiar de una a otra mientras
+         * todavía se solapaban bastante.
+         *
+         * Aquí calculamos un radio mínimo para que, justo en ese punto de
+         * cruce, las dos tarjetas queden separadas unos píxeles. Así el cambio
+         * de capa ocurre sin que una foto "corte" de golpe encima de la otra.
+         */
+        const medioPaso = paso / 2;
+        const senoCruce = Math.max(Math.abs(Math.sin(medioPaso)), 0.01);
+        const profundidadCruce = Math.cos(medioPaso);
+        const escalaCruce = 0.81 + profundidadCruce * 0.19;
+        const separacionExtra = 10;
+
+        const radioSinSolape =
+          (anchoTarjeta * escalaCruce + separacionExtra) /
+          (2 * senoCruce);
+
+        /*
+         * Evita radios absurdamente grandes en pantallas muy angostas,
+         * pero deja suficiente amplitud para que el cruce sea limpio.
+         */
+        const radioMaximo = escenario.clientWidth * 0.62;
+
+        radio = Math.max(
+          radioBase,
+          Math.min(radioSinSolape, radioMaximo)
         );
 
         dibujar();
