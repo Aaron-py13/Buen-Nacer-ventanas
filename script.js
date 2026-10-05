@@ -1461,81 +1461,40 @@
         dibujar(false);
       }
 
-      function dibujar(suavizar = true) {
-        let frontal = null;
-        let mayorProfundidad = -Infinity;
+      function dibujar() {
 
-        tarjetas.forEach((tarjeta, indice) => {
-          const posicion = angulo + indice * paso;
-          const profundidad = Math.cos(posicion);
-          const lateral = Math.sin(posicion);
+  tarjetas.forEach((tarjeta, indice) => {
 
-          const escala = 0.81 + profundidad * 0.19;
-          const x = lateral * radio;
-          const y = profundidad * 14;
-          const inclinacion = lateral * -6;
+    const posicion = angulo + indice * paso;
 
-          tarjeta.style.transform = `
-            translate(-50%, -50%)
-            translate(${x}px, ${y}px)
-            scale(${escala})
-            rotateY(${inclinacion}deg)
-          `;
+    const profundidad = Math.cos(posicion);
+    const lateral = Math.sin(posicion);
 
-          tarjeta.style.opacity = '1';
-          tarjeta.style.zIndex = String(Math.round((profundidad + 1) * 100));
-          tarjeta.style.pointerEvents = 'auto';
-          tarjeta.tabIndex = 0;
-          tarjeta.removeAttribute('aria-hidden');
+    const escala = 0.81 + profundidad * 0.19;
 
-          if (profundidad > mayorProfundidad) {
-            mayorProfundidad = profundidad;
-            frontal = tarjeta;
-          }
-        });
+    const x = lateral * radio;
+    const y = profundidad * 14;
 
-        /*
-         * Suaviza el cambio de la tarjeta delantera.
-         * La copia se crea solamente cuando cambia,
-         * no en cada fotograma.
-         */
-        if (suavizar && frontalAnterior && frontal !== frontalAnterior && !sinMovimiento()) {
-          eliminarPuente();
+    const inclinacion = lateral * -6;
 
-          const original = frontalAnterior;
-          const copia = original.cloneNode(true);
+    tarjeta.style.transform = `
+      translate(-50%, -50%)
+      translate3d(${x}px, ${y}px, 0)
+      scale(${escala})
+      rotateY(${inclinacion}deg)
+    `;
 
-          copia.removeAttribute('id');
-          copia.removeAttribute('aria-current');
-          copia.setAttribute('aria-hidden', 'true');
-          copia.tabIndex = -1;
-          copia.disabled = true;
+    tarjeta.style.opacity = '1';
 
-          copia.style.zIndex = '500';
-          copia.style.pointerEvents = 'none';
+    tarjeta.style.zIndex =
+      String(Math.round((profundidad + 1) * 100));
 
-          escenario.appendChild(copia);
+    tarjeta.style.pointerEvents = 'auto';
 
-          const animacion = copia.animate(
-            [{ opacity: 1 }, { opacity: 0 }],
-            { duration: 650, easing: 'ease-in-out', fill: 'forwards' }
-          );
-
-          puente = { original, elemento: copia, animacion };
-
-          animacion.onfinish = () => {
-            copia.remove();
-            if (puente?.elemento === copia) puente = null;
-          };
-        }
-
-        if (puente) {
-          puente.elemento.style.transform = puente.original.style.transform;
-        }
-
-        frontalAnterior = frontal;
-      }
-
+    tarjeta.tabIndex = 0;
+    tarjeta.removeAttribute('aria-hidden');
+  });
+}
       function puedeGirar() {
         return (
           visible &&

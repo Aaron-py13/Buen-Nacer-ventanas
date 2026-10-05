@@ -2352,23 +2352,34 @@ footer.bn-social-end a.bn-video-button:active {
 
 /* ── Escenario 3D (el JS añade .bn-cover-ready) ── */
 .bn-cover.bn-cover-ready .bn-cover-stage{
-  display: block; position: relative;
+  display: block;
+  position: relative;
   height: clamp(340px, 40vw, 470px);
   padding: 0;
-  overflow: hidden;      /* recorta los lados, como en tu video 2 */
+  overflow: hidden;
   perspective: 1000px;
+
+  /* AÑADE ESTO */
+  transform-style: preserve-3d;
 }
 
 .bn-cover.bn-cover-ready .bn-cover-card{
-  position: absolute; top: 50%; left: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
 
-  /* ►►► ESTE ES EL VALOR A TOCAR SI QUIERES MÁS O MENOS GRANDE ◄◄◄ */
   width: min(44%, 270px);
 
   margin: 0;
-  transition: none !important;   /* el JS dibuja cada fotograma */
+
+  transition: none !important;
   animation: none !important;
+
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  will-change: transform;
+  transform-style: preserve-3d;
 }
 
 .bn-cover.bn-cover-ready .bn-cover-card img{
