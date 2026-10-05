@@ -1450,42 +1450,47 @@
         dibujar();
       }
 
-      function dibujar() {
-        tarjetas.forEach((tarjeta, indice) => {
-          const posicion = angulo + indice * paso;
-          const profundidad = Math.cos(posicion);
-          const lateral = Math.sin(posicion);
+function dibujar() {
+  tarjetas.forEach((tarjeta, indice) => {
 
-          const escala = 0.81 + profundidad * 0.19;
-          const x = lateral * radio;
-          const y = profundidad * 14;
-          const inclinacion = lateral * -6;
+    const posicion = angulo + indice * paso;
+    const profundidad = Math.cos(posicion);
+    const lateral = Math.sin(posicion);
 
-          tarjeta.style.transform = `
-            translate(-50%, -50%)
-            translate3d(${x}px, ${y}px, 0)
-            scale(${escala})
-            rotateY(${inclinacion}deg)
-          `;
+    /* Oculta solamente las tarjetas que están detrás */
+    if (profundidad < -0.15) {
+      tarjeta.style.opacity = '0';
+      tarjeta.style.visibility = 'hidden';
+      tarjeta.style.pointerEvents = 'none';
+      tarjeta.tabIndex = -1;
+      tarjeta.setAttribute('aria-hidden', 'true');
+      return;
+    }
 
-          tarjeta.style.opacity = '1';
-          tarjeta.style.visibility = 'visible';
+    tarjeta.style.visibility = 'visible';
 
-          /*
-           * Antes se usaban solo 100 niveles de z-index.
-           * Dos tarjetas podían quedar empatadas durante varios frames
-           * y luego una saltaba encima de la otra.
-           * Con mucha más precisión, el cambio ocurre justo en el cruce.
-           */
-          tarjeta.style.zIndex =
-            String(Math.round((profundidad + 1) * 100000) + indice);
+    const escala = 0.81 + profundidad * 0.19;
+    const x = lateral * radio;
+    const y = profundidad * 14;
+    const inclinacion = lateral * -6;
 
-          tarjeta.style.pointerEvents = 'auto';
-          tarjeta.tabIndex = 0;
-          tarjeta.removeAttribute('aria-hidden');
-        });
-      }
+    tarjeta.style.transform = `
+      translate(-50%, -50%)
+      translate3d(${x}px, ${y}px, 0)
+      scale(${escala})
+      rotateY(${inclinacion}deg)
+    `;
 
+    tarjeta.style.opacity = '1';
+
+    tarjeta.style.zIndex =
+      String(Math.round((profundidad + 1) * 100000) + indice);
+
+    tarjeta.style.pointerEvents = 'auto';
+    tarjeta.tabIndex = 0;
+    tarjeta.removeAttribute('aria-hidden');
+  });
+}s
       function puedeGirar() {
         return (
           visible &&
