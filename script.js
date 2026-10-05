@@ -1457,8 +1457,8 @@ function dibujar() {
     const profundidad = Math.cos(posicion);
     const lateral = Math.sin(posicion);
 
-    /* Oculta solamente las tarjetas que están detrás */
-    if (profundidad < -0.15) {
+    /* Solo ocultamos la tarjeta que está realmente al fondo */
+    if (profundidad < -0.85) {
       tarjeta.style.opacity = '0';
       tarjeta.style.visibility = 'hidden';
       tarjeta.style.pointerEvents = 'none';
@@ -1467,6 +1467,7 @@ function dibujar() {
       return;
     }
 
+    /* Las demás se muestran normalmente */
     tarjeta.style.visibility = 'visible';
 
     const escala = 0.81 + profundidad * 0.19;
@@ -1483,6 +1484,7 @@ function dibujar() {
 
     tarjeta.style.opacity = '1';
 
+    /* Mantiene el orden de profundidad sin cambios bruscos */
     tarjeta.style.zIndex =
       String(Math.round((profundidad + 1) * 100000) + indice);
 
@@ -1490,7 +1492,7 @@ function dibujar() {
     tarjeta.tabIndex = 0;
     tarjeta.removeAttribute('aria-hidden');
   });
-}s
+}
       function puedeGirar() {
         return (
           visible &&
