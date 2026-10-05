@@ -1419,7 +1419,7 @@
 
       const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      const SEGUNDOS_POR_VUELTA = 10;
+      const SEGUNDOS_POR_VUELTA = 24;
       const vuelta = Math.PI * 2;
       const paso = vuelta / tarjetas.length;
 
