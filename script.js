@@ -1396,11 +1396,9 @@
 
 
 /* ══════════════════════════════════════════════════════════
-   CARRUSEL DE PORTADA — FLUIDO, SIN TARJETAS CORTADAS
-   - Muestra únicamente las tarjetas cercanas al frente.
-   - Las tarjetas se separan lo suficiente para no montarse al cruzarse.
-   - Sin clones, fades blancos ni saltos de z-index.
-   - Un solo requestAnimationFrame.
+   CARRUSEL DE PORTADA — MISMO DISEÑO ORIGINAL, MÁS FLUIDO
+   Mantiene la vuelta circular, tamaños y posiciones de siempre.
+   Solo elimina el corte brusco entre tarjetas.
    ══════════════════════════════════════════════════════════ */
 (() => {
   'use strict';
@@ -1418,14 +1416,13 @@
       carrusel.classList.add('bn-cover-ready');
 
       const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const total = tarjetas.length;
 
-      /* 24 s por vuelta completa = aprox. 4 s por foto si hay 6 */
       const SEGUNDOS_POR_VUELTA = 24;
+      const vuelta = Math.PI * 2;
+      const paso = vuelta / tarjetas.length;
 
-      let posicion = 0;
-      let separacion = 0;
-      let escalaLateral = 0.72;
+      let angulo = 0;
+      let radio = 0;
       let visible = false;
       let frame = 0;
       let tiempoAnterior = null;
@@ -1438,76 +1435,31 @@
         );
       }
 
-      /*
-       * Devuelve la distancia circular más corta entre una tarjeta y
-       * la posición central. Así el carrusel puede dar vueltas sin saltar.
-       */
-      function distanciaCircular(valor) {
-        return ((valor + total / 2) % total + total) % total - total / 2;
-      }
-
       function medir() {
-        const anchoTarjeta = tarjetas[0].offsetWidth;
-        const anchoEscenario = escenario.clientWidth;
+        const mitad = tarjetas[0].offsetWidth / 2;
 
-        /*
-         * En PC las laterales siguen grandes.
-         * En pantallas pequeñas se reducen más para que no se corten
-         * ni se monten encima de la tarjeta que entra al centro.
-         */
-        if (anchoEscenario <= 400) {
-          escalaLateral = 0.40;
-          separacion = anchoTarjeta * 0.75;
-        } else if (anchoEscenario <= 620) {
-          escalaLateral = 0.58;
-          separacion = anchoTarjeta * 0.84;
-        } else {
-          escalaLateral = 0.72;
-          separacion = anchoTarjeta * 0.92;
-        }
+        const espacio = Math.max(
+          0,
+          escenario.clientWidth / 2 - 18 - mitad * 0.81
+        );
+
+        radio = Math.sqrt(
+          Math.max(0, espacio * espacio - Math.pow(mitad * 0.19, 2))
+        );
 
         dibujar();
       }
 
       function dibujar() {
         tarjetas.forEach((tarjeta, indice) => {
-          const relativo = distanciaCircular(indice - posicion);
-          const distancia = Math.abs(relativo);
+          const posicion = angulo + indice * paso;
+          const profundidad = Math.cos(posicion);
+          const lateral = Math.sin(posicion);
 
-          /*
-           * Solo dejamos visibles las tarjetas que están cerca del frente.
-           * Las que estarían "detrás" desaparecen antes de cruzarse,
-           * evitando que una foto corte a otra.
-           */
-          const LIMITE_VISIBLE = 1.28;
-
-          if (distancia >= LIMITE_VISIBLE) {
-            tarjeta.style.opacity = '0';
-            tarjeta.style.visibility = 'hidden';
-            tarjeta.style.pointerEvents = 'none';
-            tarjeta.setAttribute('aria-hidden', 'true');
-            tarjeta.tabIndex = -1;
-            return;
-          }
-
-          tarjeta.style.visibility = 'visible';
-
-          const progresoLateral = Math.min(distancia, 1);
-          const escala =
-            1 - progresoLateral * (1 - escalaLateral);
-
-          const x = relativo * separacion;
-          const y = distancia * 9;
-          const inclinacion = relativo * -5;
-
-          /*
-           * Entre 1.00 y 1.28 la tarjeta entra/sale con opacidad suave.
-           * No hay borde blanco ni aparición brusca.
-           */
-          const opacidad =
-            distancia <= 1
-              ? 1
-              : Math.max(0, 1 - (distancia - 1) / (LIMITE_VISIBLE - 1));
+          const escala = 0.81 + profundidad * 0.19;
+          const x = lateral * radio;
+          const y = profundidad * 14;
+          const inclinacion = lateral * -6;
 
           tarjeta.style.transform = `
             translate(-50%, -50%)
@@ -1516,25 +1468,21 @@
             rotateY(${inclinacion}deg)
           `;
 
-          tarjeta.style.opacity = String(opacidad);
+          tarjeta.style.opacity = '1';
+          tarjeta.style.visibility = 'visible';
 
           /*
-           * La tarjeta más cercana al centro queda encima.
-           * Como las tarjetas ya no se solapan en el punto de cruce,
-           * este cambio de capa no produce el "corte" anterior.
+           * Antes se usaban solo 100 niveles de z-index.
+           * Dos tarjetas podían quedar empatadas durante varios frames
+           * y luego una saltaba encima de la otra.
+           * Con mucha más precisión, el cambio ocurre justo en el cruce.
            */
           tarjeta.style.zIndex =
-            String(1000 - Math.round(distancia * 100));
+            String(Math.round((profundidad + 1) * 100000) + indice);
 
-          const interactiva = distancia < 0.72;
-          tarjeta.style.pointerEvents = interactiva ? 'auto' : 'none';
-          tarjeta.tabIndex = interactiva ? 0 : -1;
-
-          if (interactiva) {
-            tarjeta.removeAttribute('aria-hidden');
-          } else {
-            tarjeta.setAttribute('aria-hidden', 'true');
-          }
+          tarjeta.style.pointerEvents = 'auto';
+          tarjeta.tabIndex = 0;
+          tarjeta.removeAttribute('aria-hidden');
         });
       }
 
@@ -1563,16 +1511,16 @@
 
         if (tiempoAnterior !== null) {
           /*
-           * Limitamos el delta para que, si el navegador pierde un frame,
-           * no intente recuperar todo de golpe y provoque un salto.
+           * Si el navegador pierde un frame, no recupera todo de golpe.
+           * Esto evita el pequeño tirón que se veía al cruzarse.
            */
           const segundos = Math.min(
             Math.max((tiempo - tiempoAnterior) / 1000, 0),
             1 / 30
           );
 
-          posicion =
-            (posicion + segundos * total / SEGUNDOS_POR_VUELTA) % total;
+          angulo =
+            (angulo + segundos * vuelta / SEGUNDOS_POR_VUELTA) % vuelta;
         }
 
         tiempoAnterior = tiempo;
@@ -1592,40 +1540,35 @@
         }
       }
 
-      /* Arrastre horizontal en celular */
+      /* Arrastrar horizontalmente en celular */
       escenario.addEventListener('touchstart', (evento) => {
         const punto = evento.changedTouches[0];
-        toque = {
-          x: punto.clientX,
-          y: punto.clientY,
-          posicion
-        };
+        toque = { x: punto.clientX, y: punto.clientY, angulo };
         detener();
       }, { passive: true });
 
       escenario.addEventListener('touchmove', (evento) => {
-        if (!toque || !separacion) return;
+        if (!toque) return;
 
         const punto = evento.changedTouches[0];
         const dx = punto.clientX - toque.x;
         const dy = punto.clientY - toque.y;
 
         if (Math.abs(dx) > Math.abs(dy)) {
-          posicion = toque.posicion - dx / separacion;
+          angulo = toque.angulo + dx * 0.009;
           dibujar();
         }
       }, { passive: true });
 
       function terminarToque() {
         toque = null;
-        posicion = ((posicion % total) + total) % total;
         actualizarMovimiento();
       }
 
       escenario.addEventListener('touchend', terminarToque, { passive: true });
       escenario.addEventListener('touchcancel', terminarToque, { passive: true });
 
-      /* El mouse no debe frenar ni provocar saltos */
+      /* El mouse no detiene el giro */
       tarjetas.forEach((tarjeta) => {
         tarjeta.addEventListener('pointerdown', (evento) => {
           if (evento.pointerType === 'mouse') evento.preventDefault();
@@ -1639,7 +1582,7 @@
         });
       });
 
-      /* Navegación con teclado */
+      /* Navegación por teclado */
       carrusel.addEventListener('focusin', detener);
       carrusel.addEventListener('focusout', () => {
         setTimeout(actualizarMovimiento, 0);
@@ -1650,24 +1593,22 @@
 
         evento.preventDefault();
 
-        const actual = tarjetas.indexOf(document.activeElement);
+        const indice = tarjetas.indexOf(document.activeElement);
         const direccion = evento.key === 'ArrowRight' ? 1 : -1;
         const siguiente =
-          (Math.max(0, actual) + direccion + total) % total;
+          (Math.max(0, indice) + direccion + tarjetas.length) % tarjetas.length;
 
-        posicion = siguiente;
+        angulo = -siguiente * paso;
         dibujar();
         tarjetas[siguiente].focus({ preventScroll: true });
       });
 
-      /* Recalcular sin forzar relayout en cada frame */
       if ('ResizeObserver' in window) {
         new ResizeObserver(medir).observe(escenario);
       } else {
         window.addEventListener('resize', medir, { passive: true });
       }
 
-      /* Detener cuando el carrusel sale de pantalla */
       if ('IntersectionObserver' in window) {
         new IntersectionObserver((entradas) => {
           visible = entradas[0].isIntersecting;

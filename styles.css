@@ -2350,13 +2350,16 @@ footer.bn-social-end a.bn-video-button:active {
 .bn-cover-card span{ display: none; }
 .bn-cover-controls{ display: none !important; }
 
-/* ── Carrusel de portada: limpio, sin recortes ni velo blanco ── */
+/* ── Escenario 3D (mismo carrusel original, sin cortes blancos) ── */
 .bn-cover.bn-cover-ready .bn-cover-stage{
   display: block;
   position: relative;
   height: clamp(340px, 40vw, 470px);
   padding: 0;
+
+  /* La tarjeta puede entrar completa por los lados */
   overflow: visible;
+
   perspective: 1000px;
   transform-style: preserve-3d;
 }
@@ -2366,38 +2369,25 @@ footer.bn-social-end a.bn-video-button:active {
   top: 50%;
   left: 50%;
 
+  /* Mismo tamaño original */
   width: min(44%, 270px);
+
   margin: 0;
-
-  background: transparent;
-  overflow: hidden;
-  border-radius: 16px;
-
   transition: none !important;
   animation: none !important;
 
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-
-  will-change: transform, opacity;
-  transform-style: preserve-3d;
-  transform-origin: 50% 50%;
+  will-change: transform;
 }
 
+/* Mantiene la foto limpia: sin degradado/máscara que la corte */
 .bn-cover.bn-cover-ready .bn-cover-card img{
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: inherit;
-
-  /* La foto queda completa: sin máscara blanca arriba/abajo */
   -webkit-mask-image: none !important;
   mask-image: none !important;
 }
 
-/* El antiguo degradado blanco lateral queda desactivado */
+/* Quita el velo blanco de los bordes */
 .bn-cover.bn-cover-ready .bn-cover-card::after{
   content: none !important;
   display: none !important;
@@ -2405,28 +2395,20 @@ footer.bn-social-end a.bn-video-button:active {
 
 .bn-cover.bn-cover-ready .bn-cover-card:focus-visible{
   outline: 3px solid #956079;
-  outline-offset: 4px;
+  outline-offset: -4px;
 }
 
 @media (max-width: 900px){
   .hero .hero-visual--cover{ margin-top: 28px; }
-
-  .bn-cover.bn-cover-ready .bn-cover-stage{
-    height: 400px;
-  }
-
-  .bn-cover.bn-cover-ready .bn-cover-card{
-    width: min(45%, 235px);
-  }
+  .bn-cover.bn-cover-ready .bn-cover-stage{ height: 400px; }
 }
 
 @media (max-width: 480px){
-  .bn-cover.bn-cover-ready .bn-cover-stage{
-    height: 330px;
-  }
+  .bn-cover.bn-cover-ready .bn-cover-stage{ height: 330px; }
 
+  /* Mismo tamaño original en celular */
   .bn-cover.bn-cover-ready .bn-cover-card{
-    width: min(48%, 180px);
+    width: min(52%, 210px);
   }
 
   .hero-visual--cover .hero-badge{
@@ -2434,26 +2416,6 @@ footer.bn-social-end a.bn-video-button:active {
     font-size: 11px;
   }
 }
-
-/* Tamaño del carrusel en computadora */
-@media (min-width: 901px){
-  .hero-grid{
-    grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr);
-  }
-
-  .hero .hero-visual--cover{
-    max-width: 780px;
-  }
-
-  .bn-cover.bn-cover-ready .bn-cover-stage{
-    height: clamp(430px, 48vw, 520px);
-  }
-
-  .bn-cover.bn-cover-ready .bn-cover-card{
-    width: min(44%, 300px);
-  }
-}
-
 /* ── LOGO EN EL HEADER ──────────────────────────────────── */
 .brand{
   display: flex;
@@ -2693,6 +2655,25 @@ body,
 
 #visita #contact-form .form-note {
   color: var(--muted);
+}/* ── CARRUSEL DE PORTADA: MÁS GRANDE EN PC ──────────────── */
+@media (min-width: 901px){
+
+  /* 1· Le damos más ancho a la columna del carrusel */
+  .hero-grid{
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr);
+  }
+
+  .hero .hero-visual--cover{ max-width: 780px; }
+
+  /* 2· Más alto para que quepan las tarjetas grandes */
+  .bn-cover.bn-cover-ready .bn-cover-stage{
+    height: clamp(430px, 48vw, 520px);
+  }
+
+  /* 3· ►►► EL TAMAÑO DE LA TARJETA — este es el dial ◄◄◄ */
+  .bn-cover.bn-cover-ready .bn-cover-card{
+    width: min(48%, 320px);
+  }
 }/* Título principal de Buen Nacer */
 .hero-copy h1.bn-hero-title {
   margin: 24px 0 28px;
