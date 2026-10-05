@@ -2855,3 +2855,11 @@ body.bn-book-open{overflow:hidden}
 #sedes .section-heading{padding-right:180px;min-height:0}
 #sedes .bn-sede-art{width:165px;bottom:8px;transform:none!important;translate:none!important;scale:none!important;animation:none!important;transition:none!important}
 @media(max-width:600px){#sedes .section-heading{padding-right:0}#sedes .bn-sede-art{display:none}}
+/* Más espacio lateral solo para los programas */
+@media (min-width: 1100px) {
+  #programas.wrap {
+    width: calc(100% - 64px);
+    max-width: 1480px;
+    margin-inline: auto;
+  }
+}
