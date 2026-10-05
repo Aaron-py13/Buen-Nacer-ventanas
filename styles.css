@@ -2356,10 +2356,9 @@ footer.bn-social-end a.bn-video-button:active {
   position: relative;
   height: clamp(340px, 40vw, 470px);
   padding: 0;
-  overflow: hidden;
+  /* Deja que las tarjetas entren completas sin cortarse en los lados */
+  overflow: visible;
   perspective: 1000px;
-
-  /* AÑADE ESTO */
   transform-style: preserve-3d;
 }
 
@@ -2390,11 +2389,8 @@ footer.bn-social-end a.bn-video-button:active {
 }
 
 .bn-cover.bn-cover-ready .bn-cover-card::after{
-  content: ""; position: absolute; inset: 0;
-  pointer-events: none; border-radius: inherit;
-  background: linear-gradient(to right,
-    var(--paper,#fffcf7), transparent 4%,
-    transparent 96%, var(--paper,#fffcf7));
+  /* Sin velo blanco lateral: la foto se ve completa al cruzarse */
+  display: none;
 }
 
 .bn-cover.bn-cover-ready .bn-cover-card:focus-visible{
