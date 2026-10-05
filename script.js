@@ -1450,49 +1450,66 @@
         dibujar();
       }
 
-function dibujar() {
-  tarjetas.forEach((tarjeta, indice) => {
+      function dibujar() {
+        tarjetas.forEach((tarjeta, indice) => {
+          const posicion = angulo + indice * paso;
+          const profundidad = Math.cos(posicion);
+          const lateral = Math.sin(posicion);
 
-    const posicion = angulo + indice * paso;
-    const profundidad = Math.cos(posicion);
-    const lateral = Math.sin(posicion);
+          /*
+           * SOLO se muestran las tarjetas de la mitad delantera.
+           * Las que están detrás ya no aparecen como una copia/duplicado.
+           *
+           * Cerca del borde (profundidad 0 → 0.18) hacemos un fade suave
+           * para que la tarjeta entre y salga sin corte brusco.
+           */
+          const opacidad = Math.max(
+            0,
+            Math.min(1, profundidad / 0.18)
+          );
 
-    /* Solo ocultamos la tarjeta que está realmente al fondo */
-    if (profundidad < -0.85) {
-      tarjeta.style.opacity = '0';
-      tarjeta.style.visibility = 'hidden';
-      tarjeta.style.pointerEvents = 'none';
-      tarjeta.tabIndex = -1;
-      tarjeta.setAttribute('aria-hidden', 'true');
-      return;
-    }
+          if (opacidad <= 0.001) {
+            tarjeta.style.opacity = '0';
+            tarjeta.style.visibility = 'hidden';
+            tarjeta.style.pointerEvents = 'none';
+            tarjeta.tabIndex = -1;
+            tarjeta.setAttribute('aria-hidden', 'true');
+            return;
+          }
 
-    /* Las demás se muestran normalmente */
-    tarjeta.style.visibility = 'visible';
+          const escala = 0.81 + profundidad * 0.19;
+          const x = lateral * radio;
+          const y = profundidad * 14;
+          const inclinacion = lateral * -6;
 
-    const escala = 0.81 + profundidad * 0.19;
-    const x = lateral * radio;
-    const y = profundidad * 14;
-    const inclinacion = lateral * -6;
+          tarjeta.style.transform = `
+            translate(-50%, -50%)
+            translate3d(${x}px, ${y}px, 0)
+            scale(${escala})
+            rotateY(${inclinacion}deg)
+          `;
 
-    tarjeta.style.transform = `
-      translate(-50%, -50%)
-      translate3d(${x}px, ${y}px, 0)
-      scale(${escala})
-      rotateY(${inclinacion}deg)
-    `;
+          tarjeta.style.visibility = 'visible';
+          tarjeta.style.opacity = String(opacidad);
 
-    tarjeta.style.opacity = '1';
+          /*
+           * Mantiene la misma profundidad del carrusel original,
+           * con suficiente precisión para evitar saltos de capa.
+           */
+          tarjeta.style.zIndex =
+            String(Math.round((profundidad + 1) * 100000) + indice);
 
-    /* Mantiene el orden de profundidad sin cambios bruscos */
-    tarjeta.style.zIndex =
-      String(Math.round((profundidad + 1) * 100000) + indice);
+          tarjeta.style.pointerEvents = opacidad > 0.55 ? 'auto' : 'none';
+          tarjeta.tabIndex = opacidad > 0.55 ? 0 : -1;
 
-    tarjeta.style.pointerEvents = 'auto';
-    tarjeta.tabIndex = 0;
-    tarjeta.removeAttribute('aria-hidden');
-  });
-}
+          if (opacidad > 0.55) {
+            tarjeta.removeAttribute('aria-hidden');
+          } else {
+            tarjeta.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
+
       function puedeGirar() {
         return (
           visible &&
