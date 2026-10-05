@@ -2404,16 +2404,46 @@ footer.bn-social-end a.bn-video-button:active {
 }
 
 @media (max-width: 480px){
-  .bn-cover.bn-cover-ready .bn-cover-stage{ height: 330px; }
 
-  /* Mismo tamaño original en celular */
+  .hero .hero-visual--cover{
+    margin-top: 18px;
+  }
+
+  .bn-cover{
+    padding-top: 18px;
+  }
+
+  .bn-cover.bn-cover-ready .bn-cover-stage{
+    height: 310px;
+    width: 100%;
+    overflow: hidden;
+    perspective: 1000px;
+  }
+
   .bn-cover.bn-cover-ready .bn-cover-card{
-    width: min(52%, 210px);
+    width: min(46vw, 190px);
+    border-radius: 16px;
+  }
+
+  .bn-cover.bn-cover-ready .bn-cover-card img{
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 16px;
+
+    /* En móvil sin degradados raros */
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .bn-cover.bn-cover-ready .bn-cover-card::after{
+    content: none !important;
+    display: none !important;
   }
 
   .hero-visual--cover .hero-badge{
-    width: 82px;
-    font-size: 11px;
+    width: 78px;
+    font-size: 10px;
   }
 }
 /* ── LOGO EN EL HEADER ──────────────────────────────────── */
