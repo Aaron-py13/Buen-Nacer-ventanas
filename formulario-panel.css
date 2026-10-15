@@ -87,3 +87,46 @@
 #bn-booking input[readonly]{background:#eaf2ef;border-bottom-color:#b6ccc2;padding-inline:9px;border-radius:7px 7px 0 0;color:#285745;font-size:15px}
 #bn-booking .bn-book-choices label>span{height:100%}
 @media(max-width:540px){#bn-booking .bn-birth-row{grid-template-columns:1fr;gap:12px}}
+/* Formulario fijo y centrado, sin desplazamientos */
+#bn-booking {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  transform: none;
+  translate: none;
+  rotate: none;
+  scale: none;
+}
+
+#bn-booking[open] {
+  animation: bnCitaAparecer 220ms ease-out both;
+}
+
+#bn-booking[open].bn-book-closing {
+  animation: bnCitaDesaparecer 360ms ease-in both;
+}
+
+/* La fotografía permanece quieta */
+#bn-booking[open] .bn-book-photo img {
+  animation: none;
+  transition: none;
+  transform: none;
+}
+
+@keyframes bnCitaAparecer {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes bnCitaDesaparecer {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bn-booking[open],
+  #bn-booking[open].bn-book-closing {
+    animation: none;
+  }
+}
+
