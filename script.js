@@ -1781,28 +1781,82 @@
       document.getElementById('bn-book-deadline').textContent =
         `Puedes solicitar una cita para hoy, mañana o pasado mañana, hasta el ${options[2].label}. La fecha y la hora están sujetas a disponibilidad y confirmación del equipo.`;
     }
-    function close() {
-      if (!dialog.open || dialog.classList.contains('bn-book-closing')) return;
-      dialog.classList.add('bn-book-closing');
-      closeTimer = setTimeout(() => dialog.close(), reduced.matches ? 0 : 360);
+    let opening = false;
+    const photoLoads = new Map();
+    function preparePhoto(src) {
+      if (!src) return Promise.reject(new Error('Falta data-book-photo'));
+      if (photoLoads.has(src)) return photoLoads.get(src);
+      const task = new Promise((resolve, reject) => {
+        const image = new Image();
+        const timer = setTimeout(() => { image.onload = image.onerror = null; reject(new Error('Tiempo de carga agotado')); }, 15000);
+        image.onload = async () => {
+          try {
+            if (image.decode) await image.decode();
+            clearTimeout(timer); resolve(image);
+          } catch (error) { clearTimeout(timer); reject(error); }
+        };
+        image.onerror = () => { clearTimeout(timer); reject(new Error('No se encontró la foto')); };
+        image.src = src;
+      }).catch(error => { photoLoads.delete(src); throw error; });
+      photoLoads.set(src, task);
+      return task;
     }
-    document.querySelectorAll('[data-book-program]').forEach(button => {
-      button.addEventListener('click', () => {
-        if (dialog.open) return;
-        origin = button; program = button.dataset.bookProgram;
-        // Las rutas de las fotos se configuran en index.html, en data-book-photo.
-        const bookingPhoto = dialog.querySelector('.bn-book-photo img');
-        if (bookingPhoto && button.dataset.bookPhoto) {
-          bookingPhoto.src = button.dataset.bookPhoto;
-          bookingPhoto.alt = button.dataset.bookPhotoAlt || program;
+    function close() {
+      if (!dialog.open) return;
+      clearTimeout(closeTimer);
+      dialog.close();
+    }
+    const bookingButtons = [...document.querySelectorAll('[data-book-program]')];
+    // Precarga las fotos cuando sus botones se acercan a la pantalla.
+    if ('IntersectionObserver' in window) {
+      const photoObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          preparePhoto(entry.target.dataset.bookPhoto).catch(() => {});
+          photoObserver.unobserve(entry.target);
+        });
+      }, { rootMargin: '300px' });
+      bookingButtons.forEach(button => photoObserver.observe(button));
+    }
+    bookingButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        if (dialog.open || opening) return;
+        opening = true;
+        button.setAttribute('aria-busy', 'true');
+        let notice = button.parentElement.querySelector('.bn-book-load-status');
+        if (!notice) {
+          notice = document.createElement('p');
+          notice.className = 'bn-book-load-status'; notice.setAttribute('role', 'status');
+          button.after(notice);
         }
-        clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
-        form.reset(); updateChild(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
-        document.getElementById('bn-book-program').textContent = program;
-        renderDates(); dialog.showModal(); content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0; document.body.classList.add('bn-book-open');
-        // El cursor de las tarjetas no debe aparecer sobre el formulario.
-        document.documentElement.classList.remove('bn-cursor-on');
-        form.elements.nombre.focus({ preventScroll: true });
+        notice.hidden = true; notice.textContent = '';
+        const loadingNotice = setTimeout(() => { notice.hidden = false; notice.textContent = 'Preparando tu formulario…'; }, 400);
+        try {
+          const readyPhoto = await preparePhoto(button.dataset.bookPhoto);
+          const bookingPhoto = dialog.querySelector('.bn-book-photo img');
+          if (bookingPhoto) {
+            bookingPhoto.src = readyPhoto.src;
+            bookingPhoto.alt = button.dataset.bookPhotoAlt || button.dataset.bookProgram;
+            if (bookingPhoto.decode) await bookingPhoto.decode();
+          }
+          origin = button; program = button.dataset.bookProgram;
+          clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
+          form.reset(); updateChild(); updateBranches(false); editDetails();
+          status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+          document.getElementById('bn-book-program').textContent = program;
+          renderDates(); dialog.showModal();
+          document.body.classList.add('bn-book-open');
+          document.documentElement.classList.remove('bn-cursor-on');
+          form.elements.nombre.focus({ preventScroll: true });
+          dialog.scrollTop = 0; content.scrollTop = 0;
+          dialog.querySelector('.bn-book-layout').scrollTop = 0;
+          notice.hidden = true;
+        } catch (error) {
+          notice.hidden = false;
+          notice.textContent = 'No pudimos cargar la foto. Intenta abrir el formulario nuevamente.';
+        } finally {
+          clearTimeout(loadingNotice); opening = false; button.removeAttribute('aria-busy');
+        }
       });
     });
     dialog.querySelector('.bn-book-close').addEventListener('click', close);

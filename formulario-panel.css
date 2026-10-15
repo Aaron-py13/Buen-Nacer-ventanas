@@ -46,14 +46,14 @@
 #bn-booking .bn-book-summary{padding:18px 0;border-top:1px solid #d7e0de;border-bottom:1px solid #d7e0de;font-weight:700}
 #bn-booking .bn-book-edit{border:0;background:none;color:var(--bn-ink);padding:10px 0;text-decoration:underline;font:inherit;min-height:44px}
 #bn-booking #bn-book-fallback{display:block;margin:0;padding:15px 18px;background:#ffdbbd;border:1px solid #dbaa88;border-radius:13px;text-align:center;text-decoration:none;font-size:16px;font-weight:800;color:#533520}
-#bn-booking[open]{animation:bnPanelIn .6s cubic-bezier(.2,.8,.2,1) both}
-#bn-booking[open] fieldset{animation:bnPanelContent .45s .2s both}
-#bn-booking[open] .bn-book-photo img{animation:bnPanelPhoto .9s cubic-bezier(.2,.8,.2,1) both}
-#bn-booking.bn-book-closing{animation:bnPanelOut .36s cubic-bezier(.4,0,.8,.4) both;pointer-events:none}
-@keyframes bnPanelIn{from{opacity:0;transform:translateX(70px) scale(.98)}to{opacity:1;transform:none}}
-@keyframes bnPanelOut{to{opacity:0;transform:translateX(65px) scale(.98)}}
+
+#bn-booking[open] fieldset{animation:none}
+
+
+
+
 @keyframes bnPanelContent{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
-@keyframes bnPanelPhoto{from{transform:scale(1.06)}to{transform:scale(1)}}
+
 @keyframes bnPanelBackdrop{from{opacity:0}to{opacity:1}}
 @media(max-width:760px){
  #bn-booking{width:calc(100% - 20px);height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);border-radius:22px}
@@ -62,12 +62,12 @@
  #bn-booking .bn-book-photo img{object-position:center 38%}
  #bn-booking .bn-book-content{overflow:visible;padding:26px 22px}
  #bn-booking .bn-book-close{position:sticky;float:right;top:10px;right:10px;margin-right:10px;margin-bottom:-44px;background:#fffcf5}
- #bn-booking[open]{animation-name:bnPanelMobileIn}
- #bn-booking.bn-book-closing{animation-name:bnPanelMobileOut}
+
+
  #bn-booking .bn-book-names{gap:14px}
 }
-@keyframes bnPanelMobileIn{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
-@keyframes bnPanelMobileOut{to{opacity:0;transform:translateY(60px)}}
+
+
 @media(max-width:380px){#bn-booking .bn-book-content{padding:24px 16px}#bn-booking .bn-book-names{grid-template-columns:1fr}#bn-booking #bn-book-dates{grid-template-columns:1fr}#bn-booking #bn-book-dates label>span{min-height:64px}#bn-booking .bn-book-choices{gap:9px}}
 @media(prefers-reduced-motion:reduce){#bn-booking,#bn-booking *,#bn-booking::backdrop{animation:none!important;transition:none!important}}
 
@@ -87,46 +87,18 @@
 #bn-booking input[readonly]{background:#eaf2ef;border-bottom-color:#b6ccc2;padding-inline:9px;border-radius:7px 7px 0 0;color:#285745;font-size:15px}
 #bn-booking .bn-book-choices label>span{height:100%}
 @media(max-width:540px){#bn-booking .bn-birth-row{grid-template-columns:1fr;gap:12px}}
-/* Formulario fijo y centrado, sin desplazamientos */
+
+/* Posición estable: ni el panel ni la foto se animan al abrir/cerrar. */
 #bn-booking {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  transform: none;
-  translate: none;
-  rotate: none;
-  scale: none;
+ position:fixed;inset:0;margin:auto;box-sizing:border-box;
+ transform:none;translate:none;rotate:none;scale:none;
+ overflow:hidden;transition:none;
 }
-
-#bn-booking[open] {
-  animation: bnCitaAparecer 220ms ease-out both;
-}
-
-#bn-booking[open].bn-book-closing {
-  animation: bnCitaDesaparecer 360ms ease-in both;
-}
-
-/* La fotografía permanece quieta */
-#bn-booking[open] .bn-book-photo img {
-  animation: none;
-  transition: none;
-  transform: none;
-}
-
-@keyframes bnCitaAparecer {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes bnCitaDesaparecer {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #bn-booking[open],
-  #bn-booking[open].bn-book-closing {
-    animation: none;
-  }
-}
-
+#bn-booking[open],#bn-booking[open].bn-book-closing {animation:none;opacity:1;transform:none}
+#bn-booking .bn-book-layout {grid-template-rows:minmax(0,1fr);max-height:100%}
+#bn-booking .bn-book-photo {position:relative}
+#bn-booking .bn-book-photo img {position:absolute;inset:0;animation:none;transition:none;transform:none}
+#bn-booking .bn-book-content {box-sizing:border-box;scroll-behavior:auto}
+#bn-booking .bn-book-close {position:absolute;float:none;margin:0;top:10px;right:12px}
+#bn-booking[open] fieldset {animation:none}
+.bn-book-load-status {font-size:13px;margin-top:8px}
