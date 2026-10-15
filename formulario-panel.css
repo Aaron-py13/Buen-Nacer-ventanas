@@ -76,3 +76,14 @@
 #bn-booking #bn-book-branches .bn-book-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:6px;margin:0}
 #bn-booking #bn-book-branches .bn-book-choices strong{display:block;overflow-wrap:anywhere}
 @media(max-width:380px){#bn-booking #bn-book-branches .bn-book-choices{grid-template-columns:1fr}}
+
+/* Nuevos datos: reglas exclusivas del formulario de citas. */
+#bn-booking .bn-book-phone{display:block;margin-top:16px}
+#bn-booking .bn-phone-row{display:flex;align-items:center;gap:12px}
+#bn-booking .bn-phone-prefix{padding:9px 12px;background:#e8f2ed;color:#275641;border-radius:9px;font-weight:800;flex-shrink:0}
+#bn-booking #bn-phone-help{font-size:13px;margin:6px 0 0}
+#bn-booking .bn-birth-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:16px}
+#bn-booking .bn-birth-row label{min-width:0}
+#bn-booking input[readonly]{background:#eaf2ef;border-bottom-color:#b6ccc2;padding-inline:9px;border-radius:7px 7px 0 0;color:#285745;font-size:15px}
+#bn-booking .bn-book-choices label>span{height:100%}
+@media(max-width:540px){#bn-booking .bn-birth-row{grid-template-columns:1fr;gap:12px}}

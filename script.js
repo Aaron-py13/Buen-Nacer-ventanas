@@ -1734,6 +1734,36 @@
         return { value: date.toISOString().slice(0, 10), label: dateFormat.format(date) };
       });
     }
+
+    function completedMonths(birth, today) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(birth) || birth > today) return null;
+      const [y,m,d] = birth.split('-').map(Number);
+      const [ty,tm,td] = today.split('-').map(Number);
+      const parsed = new Date(Date.UTC(y,m-1,d));
+      if (y < 1900 || parsed.getUTCFullYear() !== y || parsed.getUTCMonth() !== m-1 || parsed.getUTCDate() !== d) return null;
+      let months = (ty-y)*12 + tm-m;
+      const anniversary = Math.min(d, new Date(Date.UTC(ty,tm,0)).getUTCDate());
+      if (td < anniversary) months--;
+      return Math.max(0, months);
+    }
+    function updateChild() {
+      const baby = program === 'Estimulación temprana';
+      document.getElementById('bn-child-heading').textContent = baby ? 'Datos del bebé' : 'Datos de tu hijo o hija';
+      document.getElementById('bn-age-label').textContent = baby ? 'Edad en meses' : 'Edad en años y meses';
+      const birth = form.elements.fechaNacimiento;
+      birth.max = upcomingDates()[0].value;
+      birth.min = '1900-01-01';
+      const months = completedMonths(birth.value, birth.max);
+      birth.setCustomValidity(birth.value && months === null ? 'Selecciona una fecha de nacimiento válida, no posterior a hoy.' : '');
+      form.elements.edadMeses.value = months === null ? '' : months;
+      const years = Math.floor(months / 12), rest = months % 12;
+      form.elements.edadCalculada.value = months === null ? '' : baby
+        ? `${months} ${months === 1 ? 'mes' : 'meses'}`
+        : `${years} ${years === 1 ? 'año' : 'años'} y ${rest} ${rest === 1 ? 'mes' : 'meses'}`;
+    }
+    form.elements.fechaNacimiento.addEventListener('input', updateChild);
+    form.elements.fechaNacimiento.addEventListener('change', updateChild);
+
     function renderDates() {
       const options = upcomingDates();
       dayKey = options[0].value;
@@ -1761,7 +1791,7 @@
         if (dialog.open) return;
         origin = button; program = button.dataset.bookProgram;
         clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
-        form.reset(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
+        form.reset(); updateChild(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
         document.getElementById('bn-book-program').textContent = program;
         renderDates(); dialog.showModal(); content.scrollTop = 0; dialog.querySelector('.bn-book-layout').scrollTop = 0; document.body.classList.add('bn-book-open');
         // El cursor de las tarjetas no debe aparecer sobre el formulario.
@@ -1799,14 +1829,17 @@
         const input = form.elements[name];
         input.setCustomValidity(input.value.trim() ? '' : 'Completa este campo.');
       }
-      const age = form.elements.edadMeses;
-      age.setCustomValidity(age.value !== '' && Number.isInteger(age.valueAsNumber) && age.valueAsNumber >= 0 ? '' : 'Escribe la edad en meses completos, desde 0.');
+      updateChild();
+      const phone = form.elements.whatsappContacto;
+      const digits = phone.value.replace(/[\s()+-]/g, '');
+      const national = digits.length === 11 && digits.startsWith('51') ? digits.slice(2) : digits;
+      phone.setCustomValidity(/^9\d{8}$/.test(national) ? '' : 'Ingresa un celular peruano de 9 dígitos que empiece con 9.');
       if (!form.reportValidity()) return;
       const data = new FormData(form);
       const date = options.find(option => option.value === data.get('fecha'));
       if (!date || !program) return;
       const branchLine = data.get('modalidad') === 'Presencial' ? `\nSede: ${data.get('sedeCita')}.` : '';
-      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nNombre de mi hijo o hija: ${data.get('nombreHijo').trim()} ${data.get('apellidoHijo').trim()}.\nEdad: ${Number(data.get('edadMeses'))} meses.\nModalidad: ${data.get('modalidad')}.${branchLine}\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
+      const message = `Hola, Buen Nacer. Soy ${data.get('nombre').trim()} ${data.get('apellido').trim()}. Quisiera solicitar una reunión informativa sobre ${program}.\nWhatsApp de contacto: +51 ${national}.\nNombre de mi hijo o hija: ${data.get('nombreHijo').trim()} ${data.get('apellidoHijo').trim()}.\nFecha de nacimiento: ${data.get('fechaNacimiento').split('-').reverse().join('/')}.\nEdad: ${form.elements.edadCalculada.value}.\nModalidad: ${data.get('modalidad')}.${branchLine}\nFecha solicitada: ${date.label}.\n¿Podrían confirmar disponibilidad y horario? Gracias.`;
       const url = `https://wa.me/51966321996?text=${encodeURIComponent(message)}`;
       fallback.href = url; fallback.hidden = false;
       status.textContent = 'Solicitud preparada. Envíala en WhatsApp para que el equipo confirme tu cita.';

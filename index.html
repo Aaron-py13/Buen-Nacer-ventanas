@@ -894,7 +894,7 @@
       <div class="bn-book-layout">
         <figure class="bn-book-photo">
           <!-- Cambia solo este src cuando tengas la nueva foto. -->
-          <img src="assets/estimulacion.jpg" alt="Actividades compartidas en Buen Nacer" decoding="async">
+          <img src="assets/Estimulaciontemprana.png" alt="Actividades compartidas en Buen Nacer" decoding="async">
         </figure>
         <div class="bn-book-content">
       <div class="bn-book-heading">
@@ -905,26 +905,34 @@
       <form id="bn-book-form">
         <div class="bn-book-fields">
         <fieldset>
-          <legend>Datos del papá o mamá</legend>
+          <legend>Datos de mamá o papá</legend>
           <div class="bn-book-names">
             <label>Nombre<input name="nombre" autocomplete="section-parent given-name" maxlength="70" required placeholder="Tu nombre"></label>
             <label>Apellido<input name="apellido" autocomplete="section-parent family-name" maxlength="90" required placeholder="Tu apellido"></label>
           </div>
+          <label class="bn-book-phone">Número de WhatsApp
+            <span class="bn-phone-row"><span class="bn-phone-prefix">+51</span><input type="tel" name="whatsappContacto" autocomplete="tel-national" inputmode="tel" required maxlength="20" placeholder="987 654 321" aria-describedby="bn-phone-help"></span>
+          </label>
+          <p id="bn-phone-help">Para contactarte y coordinar tu reunión.</p>
         </fieldset>
         <fieldset>
-          <legend>Datos de tu hijo o hija</legend>
+          <legend id="bn-child-heading">Datos de tu hijo o hija</legend>
           <div class="bn-book-names">
             <label>Nombre<input name="nombreHijo" autocomplete="section-child given-name" maxlength="70" required placeholder="Su nombre"></label>
             <label>Apellido<input name="apellidoHijo" autocomplete="section-child family-name" maxlength="90" required placeholder="Su apellido"></label>
           </div>
-          <label class="bn-book-age">Edad en meses<input type="number" name="edadMeses" min="0" step="1" inputmode="numeric" required placeholder="Ej.: 8" aria-describedby="bn-book-age-help"></label>
-          <p id="bn-book-age-help">Meses cumplidos. Si tiene menos de un mes, escribe 0.</p>
+          <div class="bn-birth-row">
+            <label>Fecha de nacimiento<input type="date" name="fechaNacimiento" required aria-describedby="bn-book-age-help"></label>
+            <label><span id="bn-age-label">Edad en meses</span><input type="text" name="edadCalculada" readonly placeholder="Se calcula automáticamente" aria-live="polite"></label>
+          </div>
+          <input type="hidden" name="edadMeses">
+          <p id="bn-book-age-help">Calculamos la edad actual a partir de la fecha de nacimiento.</p>
         </fieldset>
         <fieldset>
           <legend>¿Cómo prefieres reunirnos?</legend>
           <div class="bn-book-choices">
-            <label><input type="radio" name="modalidad" value="Virtual por Zoom" required><span><strong>Virtual</strong><small>Por Zoom</small><small>9:00 a. m. a 9:00 p. m.</small><small>Atención previa cita</small></span></label>
-            <label><input type="radio" name="modalidad" value="Presencial" required><span><strong>Presencial</strong><small>En nuestra sede</small><small>9:00 a. m. a 5:30 p. m.</small><small>Atención previa cita</small></span></label>
+            <label><input type="radio" name="modalidad" value="Virtual por Zoom" required><span><strong>Virtual</strong><small>Desde la comodidad de su hogar</small><small>Por Zoom</small><small>9:00 a. m. a 9:00 p. m.</small></span></label>
+            <label><input type="radio" name="modalidad" value="Presencial" required><span><strong>Presencial</strong><small>Con previa cita</small><small>9:00 a. m. a 5:30 p. m.</small></span></label>
           </div>
         </fieldset>
         <fieldset id="bn-book-branches" hidden disabled>
