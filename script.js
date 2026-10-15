@@ -1790,6 +1790,12 @@
       button.addEventListener('click', () => {
         if (dialog.open) return;
         origin = button; program = button.dataset.bookProgram;
+        // Las rutas de las fotos se configuran en index.html, en data-book-photo.
+        const bookingPhoto = dialog.querySelector('.bn-book-photo img');
+        if (bookingPhoto && button.dataset.bookPhoto) {
+          bookingPhoto.src = button.dataset.bookPhoto;
+          bookingPhoto.alt = button.dataset.bookPhotoAlt || program;
+        }
         clearTimeout(closeTimer); dialog.classList.remove('bn-book-closing');
         form.reset(); updateChild(); updateBranches(false); editDetails(); status.textContent = ''; fallback.hidden = true; fallback.removeAttribute('href');
         document.getElementById('bn-book-program').textContent = program;
