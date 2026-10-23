@@ -2911,3 +2911,43 @@ body.bn-book-open{overflow:hidden}
     margin-inline: auto;
   }
 }
+
+/* Video vertical de YouTube: únicamente el apartado Nosotros. */
+#nosotros .about-video {
+  width: 100%;
+  max-width: 360px;
+  min-width: 0;
+  justify-self: center;
+}
+
+#nosotros .about-video-player {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 177.777778%;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #183d32;
+  box-shadow: 0 16px 32px rgb(37 77 60 / 12%);
+}
+
+#nosotros .about-video-player iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+#nosotros .about-video .about-tag {
+  position: static;
+  margin-top: 16px;
+  padding: 14px 20px;
+  text-align: center;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  #nosotros .about-video { max-width: 320px; }
+}
