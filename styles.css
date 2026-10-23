@@ -2915,7 +2915,7 @@ body.bn-book-open{overflow:hidden}
 /* Video vertical de YouTube: únicamente el apartado Nosotros. */
 #nosotros .about-video {
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
   min-width: 0;
   justify-self: center;
 }
@@ -2949,5 +2949,6 @@ body.bn-book-open{overflow:hidden}
 }
 
 @media (max-width: 900px) {
-  #nosotros .about-video { max-width: 320px; }
+  #nosotros .about-video { max-width: 320px; order: 2; }
+  #nosotros .about-grid > div:not(.about-video) { order: 1; min-width: 0; }
 }
