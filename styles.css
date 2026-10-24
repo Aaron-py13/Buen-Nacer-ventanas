@@ -2952,3 +2952,9 @@ body.bn-book-open{overflow:hidden}
   #nosotros .about-video { max-width: 320px; order: 2; }
   #nosotros .about-grid > div:not(.about-video) { order: 1; min-width: 0; }
 }
+
+/* Contacto: llamada disponible en pantallas de celular y tablet. */
+footer.bn-social-end a.bn-telefono { display: none !important; }
+@media (max-width: 1366px) and (any-pointer: coarse), (max-width: 900px) {
+  footer.bn-social-end a.bn-telefono { display: flex !important; }
+}
