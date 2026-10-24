@@ -2958,3 +2958,9 @@ footer.bn-social-end a.bn-telefono { display: none !important; }
 @media (max-width: 1366px) and (any-pointer: coarse), (max-width: 900px) {
   footer.bn-social-end a.bn-telefono { display: flex !important; }
 }
+
+/* TikTok: mismo estilo de bloque, visible en todos los dispositivos. */
+footer.bn-social-end a.bn-tiktok {
+  --fondo: #e5ddf6;
+  --borde: #624586;
+}
